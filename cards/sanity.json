@@ -1,0 +1,94 @@
+{
+ "vendor": "sanity",
+ "name": "Sanity",
+ "sla_url": "https://www.sanity.io/legal/sla",
+ "sla_texts": [
+  {
+   "file": "sanity.txt",
+   "sha256": "0047b586e9f90dea11f3a91a2ff16ffda1c151560915ed7abcf1b83ad2590f7c"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "e1",
+   "label": "Sanity Enterprise E1",
+   "period": "month",
+   "period_utc_offset_hours": 1,
+   "customer_must_request": true,
+   "claim": {
+    "days_after_breach": 30,
+    "channel": "Email sla.support@sanity.io, subject \"SLA Credit Request\"",
+    "quote": "Subscriber must notify Sanity (mailto:sla.support@sanity.io) within thirty (30) days from the missed Availability Commitment. The notice shall include \"SLA Credit Request\" in the subject line, the dat"
+   },
+   "services": [
+    {
+     "service": "Sanity Service",
+     "threshold_pct": 99.9,
+     "threshold_quote": "at least 99.9% of the time for Subscribers under an Enterprise E1, and 99.95% for Enterprise E2 plans, in any",
+     "tiers": [
+      {
+       "from_pct": 0,
+       "below_pct": 99.9,
+       "credit_pct": 10
+      }
+     ],
+     "tiers_quote": "Enterprise Agreement Availability Calculation of Service Credit 99.9% - 99.95% 10% multiplied by the Annual Service Fee divided by",
+     "tiers_note": "The table lists one tier (10% of annual fee / 12); it is applied to any month below the plan threshold.",
+     "match": {
+      "components": [
+       "api.sanity.io",
+       "apicdn.sanity.io",
+       "cdn.sanity.io",
+       "Authentication",
+       "GraphQL"
+      ]
+     },
+     "scope_quote": "The Service will be operational and available to Subscriber 24 hours per day, 7 days per week at least 99.9% of the time"
+    }
+   ]
+  },
+  {
+   "plan": "e2",
+   "label": "Sanity Enterprise E2",
+   "period": "month",
+   "period_utc_offset_hours": 1,
+   "customer_must_request": true,
+   "claim": {
+    "days_after_breach": 30,
+    "channel": "Email sla.support@sanity.io, subject \"SLA Credit Request\"",
+    "quote": "Subscriber must notify Sanity (mailto:sla.support@sanity.io) within thirty (30) days from the missed Availability Commitment. The notice shall include \"SLA Credit Request\" in the subject line, the dat"
+   },
+   "services": [
+    {
+     "service": "Sanity Service",
+     "threshold_pct": 99.95,
+     "threshold_quote": "at least 99.9% of the time for Subscribers under an Enterprise E1, and 99.95% for Enterprise E2 plans, in any",
+     "tiers": [
+      {
+       "from_pct": 0,
+       "below_pct": 99.95,
+       "credit_pct": 10
+      }
+     ],
+     "tiers_quote": "Enterprise Agreement Availability Calculation of Service Credit 99.9% - 99.95% 10% multiplied by the Annual Service Fee divided by",
+     "tiers_note": "The table lists one tier (10% of annual fee / 12); it is applied to any month below the plan threshold.",
+     "match": {
+      "components": [
+       "api.sanity.io",
+       "apicdn.sanity.io",
+       "cdn.sanity.io",
+       "Authentication",
+       "GraphQL"
+      ]
+     },
+     "scope_quote": "The Service will be operational and available to Subscriber 24 hours per day, 7 days per week at least 99.9% of the time"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Months start at midnight Central European Time, as the SLA states."
+ ]
+}

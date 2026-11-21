@@ -1,0 +1,374 @@
+{
+ "vendor": "aws",
+ "name": "AWS",
+ "sla_url": "https://aws.amazon.com/legal/service-level-agreements/",
+ "sla_texts": [
+  {
+   "file": "aws_apigw.txt",
+   "sha256": "19324fa50625dfda33d13b489e4fb01b94f270292f0688384523967af023f5f2"
+  },
+  {
+   "file": "aws_cloudfront.txt",
+   "sha256": "19e1806d7b9cf877caf4dfaca959a3e997c704092dd0e1f393be07af72d0948a"
+  },
+  {
+   "file": "aws_dynamodb.txt",
+   "sha256": "8c80bda54677fc26c17544c9a7cb74b1a0955f35707735ce25ab264b44ab3dfe"
+  },
+  {
+   "file": "aws_ec2.txt",
+   "sha256": "8266759f4a10fb92770668dfef6f53e3274e3dbc6cb8ac1985b1f689a35bcdef"
+  },
+  {
+   "file": "aws_eks.txt",
+   "sha256": "0d69351b71fb6e4aff869379a83c32824d91095991b9296d3c9f34a4f6ce7ab6"
+  },
+  {
+   "file": "aws_elb.txt",
+   "sha256": "7de03090565c1d271dfd0ae13e544ea2841718f21aa8f422b577d43dd44b89e4"
+  },
+  {
+   "file": "aws_lambda.txt",
+   "sha256": "2bb683c3ec9f4effa23866b8de59f65ca4875b50953527c756758fe2f5b25acb"
+  },
+  {
+   "file": "aws_rds.txt",
+   "sha256": "b8438ecd7647dc94faaab48b3af49b1da5e85f44aba5e586abb89b3a5df2daf8"
+  },
+  {
+   "file": "aws_s3.txt",
+   "sha256": "16ffb359caf56d0bf27722970aa0a4402afe58fa70986936261797366e3c01fd"
+  },
+  {
+   "file": "aws_sqs.txt",
+   "sha256": "77cd16b3cc6fc9c4eb8c17ab0333445ca7e33d4b2aa8f18a98c98edc60487511"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "standard",
+   "label": "AWS (per service, per region)",
+   "period": "month",
+   "customer_must_request": true,
+   "per_region": true,
+   "claim": {
+    "billing_cycles_after_period": 2,
+    "channel": "Case in the AWS Support Center, subject per service SLA (e.g. \"SLA Credit Request\")",
+    "quote": "the credit request must be received by us by the end of the second billing cycle after which the incident occurred and must include: 1. the"
+   },
+   "services": [
+    {
+     "service": "Amazon EC2",
+     "threshold_pct": 99.5,
+     "threshold_quote": "Less than 99.5% but equal to or greater than 99.0% 10% Less than 99.0% but equal to or greater than 95.0% 30% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.5,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 30
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.5% but equal to or greater than 99.0% 10% Less than 99.0% but equal to or greater than 95.0% 30% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "ec2"
+      ]
+     },
+     "global": false,
+     "file": "aws_ec2.txt",
+     "config_note": "Instance-Level SLA (single instance). Region-Level SLA is 99.99%."
+    },
+    {
+     "service": "Amazon S3",
+     "threshold_pct": 99.0,
+     "threshold_quote": "Less than 99.0% but greater than or equal to 98.0% 10% Less than 98.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 98.0,
+       "below_pct": 99.0,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 98.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.0% but greater than or equal to 98.0% 10% Less than 98.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "s3"
+      ]
+     },
+     "global": false,
+     "file": "aws_s3.txt",
+     "config_note": "Infrequent-access classes (lowest promise). S3 Standard is 99.9%."
+    },
+    {
+     "service": "Amazon RDS",
+     "threshold_pct": 99.5,
+     "threshold_quote": "Less than 99.5% but equal to or greater than 99.0% 10% Less than 99.0% but equal to or greater than 95.0% 25% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.5,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.5% but equal to or greater than 99.0% 10% Less than 99.0% but equal to or greater than 95.0% 25% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "rds"
+      ]
+     },
+     "global": false,
+     "file": "aws_rds.txt",
+     "config_note": "Single-DB Instance SLA. Multi-AZ is 99.95%."
+    },
+    {
+     "service": "AWS Lambda",
+     "threshold_pct": 99.95,
+     "threshold_quote": "Less than 99.95% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.95,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.95% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "lambda"
+      ]
+     },
+     "global": false,
+     "file": "aws_lambda.txt"
+    },
+    {
+     "service": "Amazon DynamoDB",
+     "threshold_pct": 99.99,
+     "threshold_quote": "Less than 99.99% but equal to or greater than 99.0% 10% Less than 99.0% but equal to or greater than 95.0% 25% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.99,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.99% but equal to or greater than 99.0% 10% Less than 99.0% but equal to or greater than 95.0% 25% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "dynamodb"
+      ]
+     },
+     "global": false,
+     "file": "aws_dynamodb.txt",
+     "config_note": "Standard SLA. Global Tables is 99.999%."
+    },
+    {
+     "service": "Elastic Load Balancing",
+     "threshold_pct": 99.9,
+     "threshold_quote": "Less than 99.9% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 30% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.9,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 30
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.9% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 30% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "elb"
+      ]
+     },
+     "global": false,
+     "file": "aws_elb.txt",
+     "config_note": "Single Load Balancer SLA. Multi-AZ is 99.99%."
+    },
+    {
+     "service": "Amazon CloudFront",
+     "threshold_pct": 99.9,
+     "threshold_quote": "Less than 99.9% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.9,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.9% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "cloudfront"
+      ]
+     },
+     "global": true,
+     "file": "aws_cloudfront.txt"
+    },
+    {
+     "service": "Amazon EKS",
+     "threshold_pct": 99.95,
+     "threshold_quote": "Less than 99.95% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.95,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.95% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "eks"
+      ]
+     },
+     "global": false,
+     "file": "aws_eks.txt",
+     "config_note": "Standard Control Plane. Provisioned Control Plane is 99.99%."
+    },
+    {
+     "service": "Amazon SQS",
+     "threshold_pct": 99.9,
+     "threshold_quote": "Less than 99.9% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.9,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.9% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "sqs"
+      ]
+     },
+     "global": false,
+     "file": "aws_sqs.txt"
+    },
+    {
+     "service": "Amazon API Gateway",
+     "threshold_pct": 99.95,
+     "threshold_quote": "Less than 99.95% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.95,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Less than 99.95% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 100%",
+     "match": {
+      "cloud_service_keys": [
+       "apigateway"
+      ]
+     },
+     "global": false,
+     "file": "aws_apigw.txt"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Thresholds are the lowest each service lists (single-instance or standard configurations); multi-AZ deployments have stricter promises and the claim can use them."
+ ]
+}

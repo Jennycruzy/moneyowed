@@ -1,0 +1,54 @@
+{
+ "vendor": "mailgun",
+ "name": "Mailgun",
+ "sla_url": "https://www.mailgun.com/legal/sla/",
+ "sla_texts": [
+  {
+   "file": "mailgun.txt",
+   "sha256": "f4f8992a83c40a412d506eea1324aea60022e4401ce3bb7e93f2f5c29db107f6"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "paid",
+   "label": "Mailgun",
+   "period": "month",
+   "customer_must_request": true,
+   "claim": {
+    "deadline_unstated": true,
+    "channel": "Support ticket from the Mailgun control panel",
+    "quote": null,
+    "note": "The English SLA text does not state a claim window. MONEY OWED shows \"claim as soon as possible\" and never invents a date."
+   },
+   "cap": {
+    "pct_of_fee": 50,
+    "quote": "shall not exceed 50% of the fees for that billing period. Cr"
+   },
+   "services": [
+    {
+     "service": "API, SMTP and Outbound Delivery",
+     "threshold_pct": 99.99,
+     "threshold_quote": "will be available 99.99% of the time in any given monthly billing period, excluding mainte",
+     "credit_formula": "per_block",
+     "block_minutes": 30,
+     "credit_pct_per_block": 5,
+     "free_pct": 0.01,
+     "credit_quote": "Customer is entitled to a credit of 5% of their given monthly fee for the Service for each thirty (30) minutes of Services unavailability (after the first .01%) in a given monthly period. Customer is",
+     "match": {
+      "components": [
+       "API",
+       "SMTP",
+       "Outbound Delivery"
+      ]
+     },
+     "scope_quote": "MTP and Outbound Delivery services listed on our status page) will be available"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Customer must show its use was adversely affected (SLA 3.3)."
+ ]
+}

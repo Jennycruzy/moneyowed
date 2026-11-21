@@ -1,0 +1,52 @@
+{
+ "vendor": "digitalocean",
+ "name": "DigitalOcean",
+ "sla_url": "https://www.digitalocean.com/legal/sla",
+ "sla_texts": [
+  {
+   "file": "digitalocean.txt",
+   "sha256": "afc7ab0be34e569b13d9a521892686cdf831b1bb36c603562399ed10ee64e668"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "droplets",
+   "label": "DigitalOcean CPU Droplets",
+   "period": "month",
+   "customer_must_request": true,
+   "claim": {
+    "billing_cycles_after_period": 2,
+    "channel": "Email success@digitalocean.com with account email, Droplet details and outage dates/times",
+    "quote": "To request a Service Credit, contact DigitalOcean at success @digitalocean .com within two (2) billing cycles of the month when the downtime occurred. Include the email address associated with your account, affected Droplet resource details, and outage dates/t"
+   },
+   "services": [
+    {
+     "service": "CPU Droplets",
+     "threshold_pct": 99.99,
+     "threshold_quote": "DigitalOcean commits to a Monthly Uptime Percentage of 99.99% for each individual Droplet instance.",
+     "tiers": [
+      {
+       "from_pct": 0,
+       "below_pct": 99.99,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "Monthly Uptime Percentage Service Credit Percentage less than 99.99% 100% Servic",
+     "per_resource": true,
+     "match": {
+      "groups": [
+       "Droplets"
+      ]
+     },
+     "scope_quote": "This DigitalOcean Service Level Agreement (“SLA”) governs your use of DigitalOcean Droplets and applies separately to each Droplet you use. In case of"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Per Droplet: only Droplets in a region named by the incident are owed; the claim lists regions.",
+  "Kubernetes, App Platform, Databases, Spaces and control panel have their own terms or none and are not counted here."
+ ]
+}

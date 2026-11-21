@@ -1,0 +1,126 @@
+{
+ "vendor": "github",
+ "name": "GitHub",
+ "sla_url": "https://github.com/customer-terms/github-online-services-sla",
+ "sla_texts": [
+  {
+   "file": "github.txt",
+   "sha256": "ce2b50bb136c708ab2f783077ff1f3f07207a8e234d3027dabde0bed603d82e7"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "enterprise-cloud",
+   "label": "GitHub Enterprise Cloud",
+   "period": "quarter",
+   "customer_must_request": true,
+   "claim": {
+    "days_after_period_end": 30,
+    "channel": "Written request to GitHub Support (or a Microsoft support ticket if bought through Microsoft)",
+    "quote": "Customer may redeem Service Credits only upon written request within thirty (30) days of the end of the Applicable Period. Written requests for Service Credits should be sent either (a) to GitHub Support if Customer purchases directly from GitHub, or (b) through a Microsoft support ticket if Customer purchases SLA-covered Servic"
+   },
+   "measure_quote": "“Applicable Period” means the calendar quarter in which a Service Credit is owed. “Applica",
+   "services": [
+    {
+     "service": "GitHub Enterprise Cloud",
+     "threshold_pct": 99.9,
+     "tiers": [
+      {
+       "from_pct": 99.5,
+       "below_pct": 99.9,
+       "credit_pct": 5
+      },
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.5,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      }
+     ],
+     "tiers_quote": "99.5% <= Uptime < 99.9% 5% 99.0% <= Uptime < 99.5% 10% Uptime < 99.0% 25% Customer may redeem Servic",
+     "threshold_quote": "GitHub commits to maintain at least 99.9% Uptime for the applicable GitHub servi",
+     "match": {
+      "components": [
+       "Git Operations",
+       "Issues",
+       "Pages",
+       "Pull Requests",
+       "Webhooks",
+       "API Requests"
+      ]
+     },
+     "scope_quote": "“Service Feature” is one of the following components of GitHub Enterprise Cloud: git Operations, Issues, Pages, Pull Requests, Webhooks, and API requests to these components. Uptime Calculation: C. Gi"
+    },
+    {
+     "service": "GitHub Actions",
+     "threshold_pct": 99.9,
+     "tiers": [
+      {
+       "from_pct": 99.5,
+       "below_pct": 99.9,
+       "credit_pct": 5
+      },
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.5,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      }
+     ],
+     "tiers_quote": "99.5% <= Uptime < 99.9% 5% 99.0% <= Uptime < 99.5% 10% Uptime < 99.0% 25% Customer may redeem Servic",
+     "threshold_quote": "GitHub commits to maintain at least 99.9% Uptime for the applicable GitHub servi",
+     "match": {
+      "components": [
+       "Actions"
+      ]
+     },
+     "scope_quote": "A. GitHub Actions “Total Triggered Executions” is the total number of all Actions executions triggered by Customer in a",
+     "measure_note": "The SLA measures Actions by failed executions, not minutes; status-page minutes are an estimate the claim must back with your own run history."
+    },
+    {
+     "service": "GitHub Packages",
+     "threshold_pct": 99.9,
+     "tiers": [
+      {
+       "from_pct": 99.5,
+       "below_pct": 99.9,
+       "credit_pct": 5
+      },
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.5,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      }
+     ],
+     "tiers_quote": "99.5% <= Uptime < 99.9% 5% 99.0% <= Uptime < 99.5% 10% Uptime < 99.0% 25% Customer may redeem Servic",
+     "threshold_quote": "GitHub commits to maintain at least 99.9% Uptime for the applicable GitHub servi",
+     "match": {
+      "components": [
+       "Packages"
+      ]
+     },
+     "scope_quote": "C. GitHub Packages “Average Error Rate” is the sum of Error Rates for each hour in a calendar quarter, divided by the to",
+     "measure_note": "The SLA measures Packages by error rate; status-page minutes are an estimate."
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Copilot and Codespaces are not covered by this SLA."
+ ]
+}

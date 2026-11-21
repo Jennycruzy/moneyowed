@@ -1,0 +1,58 @@
+{
+ "vendor": "prisma",
+ "name": "Prisma",
+ "sla_url": "https://www.prisma.io/sla",
+ "sla_texts": [
+  {
+   "file": "prisma.txt",
+   "sha256": "daef61e1a4ea1bae84f0be2c7285fe59276a2c447aebf39403906da5d471236c"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "pro-business-enterprise",
+   "label": "Prisma Pro / Business / Enterprise",
+   "period": "month",
+   "customer_must_request": true,
+   "claim": {
+    "billing_cycles_after_period": 2,
+    "channel": "Support ticket in the Prisma Console, category \"Billing\", title \"SLA Credit Request\", with redacted request logs",
+    "quote": "To submit an SLA credit request, open a support ticket via the Prisma Platform Console with the category \"Billing\" and the title \"SLA Credit Request.\" Your request must include: Specific downtime dates and times Affected service URLs Redacted request logs demonstrating the issue Claims must be submitted within two billing cycles"
+   },
+   "services": [
+    {
+     "service": "Prisma Covered Services",
+     "threshold_pct": 99.95,
+     "threshold_quote": "Prisma commits to maintaining a Monthly Uptime Percentage of at least 99.95% for each Covered Servic",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.95,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      }
+     ],
+     "tiers_quote": "Compensation structure: 10% credit for monthly uptime between 99% and 99.95%. 25% credit for monthly uptime be",
+     "match": {
+      "components": [
+       "Prisma Postgres",
+       "Prisma Accelerate",
+       "Prisma Compute",
+       "Prisma Optimize"
+      ]
+     },
+     "scope_quote": "Covered Services: The commercially available Prisma Services that have reached general availability. Beta Serv"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Starter and Free plans have no SLA. Services still in preview are not covered."
+ ]
+}

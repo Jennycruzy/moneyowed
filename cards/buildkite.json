@@ -1,0 +1,99 @@
+{
+ "vendor": "buildkite",
+ "name": "Buildkite",
+ "sla_url": "https://buildkite.com/about/legal/service-level-agreement",
+ "sla_texts": [
+  {
+   "file": "buildkite.txt",
+   "sha256": "58bf505e3b321ccbf4c66e04afbc2373a055159a2c1d7c34322c936bef2a1602"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "tier-2-3",
+   "label": "Buildkite Tier 2 / Tier 3",
+   "period": "month",
+   "customer_must_request": true,
+   "claim": {
+    "days_after_period_end": 5,
+    "channel": "Email support@buildkite.com with dates/times and request logs",
+    "quote": "Service Credit requests must be received by Buildkite no later than five calendar days’ following the month for which the claim is being mad"
+   },
+   "services": [
+    {
+     "service": "Platform and Pipelines",
+     "threshold_pct": 99.95,
+     "threshold_quote": "Platform Uptime Commitment 99.95% 99.95%",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.95,
+       "credit_pct": 2
+      },
+      {
+       "from_pct": 97.0,
+       "below_pct": 99.0,
+       "credit_pct": 5
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 97.0,
+       "credit_pct": 7
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 10
+      }
+     ],
+     "tiers_quote": "Platform Uptime Commitment Service Credit Percentage Less than 99.95% but equal to or greater than 99.0% 2% Less than 99% but equal to or greater than 97% 5% Less than 97% but equal to or greater than 95% 7% Less than 95% 10% In the event that Buildk",
+     "match": {
+      "name_patterns": [
+       "(?i)^(web|api|agent api|pipelines?|job dispatch|webhooks?|notifications?|rest api|graphql)"
+      ]
+     },
+     "scope_quote": "Buildkite Platform and Pipelines Service does not meet the Platform Uptime Commitment, Tie"
+    },
+    {
+     "service": "Hosted Agents",
+     "threshold_pct": 99.5,
+     "threshold_quote": "Hosted Agents Commitment 99.5% 99.5% 99.",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.5,
+       "credit_pct": 2
+      },
+      {
+       "from_pct": 97.0,
+       "below_pct": 99.0,
+       "credit_pct": 5
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 97.0,
+       "credit_pct": 7
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 10
+      }
+     ],
+     "tiers_quote": "Hosted Agents Commitment Service Credit Percentage Less than 99.5% but equal to or greater than 99.0% 2% Less than 99% but equal to or greater than 97% 5% Less than 97% but equal to or greater than 95% 7% Less than 95% 10% Claiming Service Credits To",
+     "match": {
+      "name_patterns": [
+       "(?i)hosted agents?"
+      ]
+     },
+     "scope_quote": "In the event that Buildkite Hosted Agents does not meet the Hosted Agents Commitment, Tier"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Claim window is short: five calendar days after the month."
+ ]
+}

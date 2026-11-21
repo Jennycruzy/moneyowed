@@ -1,0 +1,120 @@
+{
+ "vendor": "twilio",
+ "name": "Twilio",
+ "sla_url": "https://www.twilio.com/en-us/legal/service-level-agreement/twilio-apis",
+ "sla_texts": [
+  {
+   "file": "twilio.txt",
+   "sha256": "8f1777847a341b382cd70f8fe73215070ea5c76b23a31197cdc68eea86e07398"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "standard",
+   "label": "Twilio APIs",
+   "period": "month",
+   "customer_must_request": true,
+   "claim": {
+    "days_after_period_end": 30,
+    "channel": "Support request at help.twilio.com, subject \"SLA Claim\"",
+    "quote": "To receive an API Service Credit, Customer must submit a request to Customer Support via https://help.twilio.com for the Twilio Services APIs and https://support.sendgrid.com for the SendGrid Services API, in either case, within thirty (30) days from the last day of the calendar month in which Customer claims Twilio failed to me"
+   },
+   "services": [
+    {
+     "service": "Twilio Services APIs",
+     "threshold_pct": 99.95,
+     "threshold_quote": "Monthly API Availability Percentage Threshold Services APIs (as defined below) 99.95% Twilio Services APIs (as defined below) during the calendar months in which Customer has purchased the Twilio Administration Edition (if purchased prior to October 24, 2024) or Twilio Enterprise Edition 99.99% SendGrid Services API (as defined below) dur",
+     "tiers": [
+      {
+       "from_pct": 0,
+       "below_pct": 99.95,
+       "credit_pct": 10
+      }
+     ],
+     "tiers_quote": "Actual Monthly API Availability Percentage API Service Credit Services APIs Less than 99.95% 10% Twilio Services APIs during the calendar months in which Customer has purchased the Twilio Administration Edition (if purchased prior to October 24, 2024) or Twilio Enterprise Edition Less than 99.99% 10% SendGrid Services API during",
+     "match": {
+      "groups": [
+       "PROGRAMMABLE MESSAGING",
+       "PROGRAMMABLE VOICE US1",
+       "PROGRAMMABLE VOICE AU1",
+       "PROGRAMMABLE VOICE IE1",
+       "ACCOUNT SECURITY",
+       "CONVERSATIONS",
+       "PROGRAMMABLE VIDEO",
+       "SERVERLESS",
+       "TWILIO PLATFORM",
+       "FLEX",
+       "ELASTIC SIP TRUNKING US1",
+       "ELASTIC SIP TRUNKING AU1",
+       "ELASTIC SIP TRUNKING IE1"
+      ],
+      "exclude_name_patterns": [
+       "(?i)delivery to",
+       "(?i)carrier",
+       "(?i)delays? to",
+       "(?i)console",
+       "(?i)receipts"
+      ]
+     },
+     "scope_quote": "“ Twilio Services APIs ” means the application programming interfaces branded as “Twilio”. “ Unavail"
+    }
+   ]
+  },
+  {
+   "plan": "enterprise-edition",
+   "label": "Twilio APIs (Enterprise Edition)",
+   "period": "month",
+   "customer_must_request": true,
+   "claim": {
+    "days_after_period_end": 30,
+    "channel": "Support request at help.twilio.com, subject \"SLA Claim\"",
+    "quote": "To receive an API Service Credit, Customer must submit a request to Customer Support via https://help.twilio.com for the Twilio Services APIs and https://support.sendgrid.com for the SendGrid Services API, in either case, within thirty (30) days from the last day of the calendar month in which Customer claims Twilio failed to me"
+   },
+   "services": [
+    {
+     "service": "Twilio Services APIs",
+     "threshold_pct": 99.99,
+     "threshold_quote": "Monthly API Availability Percentage Threshold Services APIs (as defined below) 99.95% Twilio Services APIs (as defined below) during the calendar months in which Customer has purchased the Twilio Administration Edition (if purchased prior to October 24, 2024) or Twilio Enterprise Edition 99.99% SendGrid Services API (as defined below) dur",
+     "tiers": [
+      {
+       "from_pct": 0,
+       "below_pct": 99.99,
+       "credit_pct": 10
+      }
+     ],
+     "tiers_quote": "Actual Monthly API Availability Percentage API Service Credit Services APIs Less than 99.95% 10% Twilio Services APIs during the calendar months in which Customer has purchased the Twilio Administration Edition (if purchased prior to October 24, 2024) or Twilio Enterprise Edition Less than 99.99% 10% SendGrid Services API during",
+     "match": {
+      "groups": [
+       "PROGRAMMABLE MESSAGING",
+       "PROGRAMMABLE VOICE US1",
+       "PROGRAMMABLE VOICE AU1",
+       "PROGRAMMABLE VOICE IE1",
+       "ACCOUNT SECURITY",
+       "CONVERSATIONS",
+       "PROGRAMMABLE VIDEO",
+       "SERVERLESS",
+       "TWILIO PLATFORM",
+       "FLEX",
+       "ELASTIC SIP TRUNKING US1",
+       "ELASTIC SIP TRUNKING AU1",
+       "ELASTIC SIP TRUNKING IE1"
+      ],
+      "exclude_name_patterns": [
+       "(?i)delivery to",
+       "(?i)carrier",
+       "(?i)delays? to",
+       "(?i)console",
+       "(?i)receipts"
+      ]
+     },
+     "scope_quote": "“ Twilio Services APIs ” means the application programming interfaces branded as “Twilio”. “ Unavail"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Carrier and telecom-provider problems are excluded by the SLA (section 4)."
+ ]
+}

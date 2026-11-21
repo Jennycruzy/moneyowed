@@ -1,0 +1,315 @@
+{
+ "vendor": "azure",
+ "name": "Microsoft Azure",
+ "sla_url": "https://www.microsoft.com/licensing/docs/view/Service-Level-Agreements-SLA-for-Online-Services",
+ "sla_texts": [
+  {
+   "file": "azure_sla.txt",
+   "sha256": "e9d03a482581374dadbdaea9461f0d2c150c0cf7d5224967648810161c0dcbab"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "standard",
+   "label": "Azure (per service, per region)",
+   "period": "month",
+   "customer_must_request": true,
+   "per_region": true,
+   "claim": {
+    "days_after_incident": 60,
+    "channel": "Claim to Microsoft customer support with incident description, times, affected resource names and locations",
+    "quote": "For a claim related to Microsoft Azure, we must receive the claim within 60 days of the Incident. For claims r"
+   },
+   "services": [
+    {
+     "service": "Azure Virtual Machines",
+     "threshold_pct": 99.5,
+     "threshold_quote": "applicable to Customer’s use of Single-Instance Virtual Machines and Virtual Machines using the same Shared Disks by Disk type. For any Single-Instance Virtual Machine using multiple disk types and for all Virtual Machines using the same Shared Disks of multiple types*, the lowest SLA of all the disks on the Virtual Machine will apply: *For example, given two Virtual Machines VM1 and VM2 using a Premium SSD Shared Disk and a Standard SSD Shared Disk, the uptime SLA for VM1 and VM2 will be the same as the SLA for a Single-Instance Virtual Machine using Standard SSD, as shown below. Uptime Percentage (Premium SSD, Premium SSD v2, and Ultra Disk)** Uptime Percentage (Standard SSD Managed Disk) Uptime Percentage (Standard HDD Managed Disk) Service Credit < 99.9% <99.5% <95% 10% < 99% <95% <92% 25% < 95% <90% <90% 100% **Premium SSD for all Operating System Disks, and Premium SSD, Premium SSD v2 or Ultra Disk for all Data Disks. Table of Contents / Definitions Azure Virtual Network Manager Additional Definitions \"Maximum Available Minutes\" is the total accumulated minutes during an Applic",
+     "tiers": [
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.5,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 90.0,
+       "below_pct": 95.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 90.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "applicable to Customer’s use of Single-Instance Virtual Machines and Virtual Machines using the same Shared Disks by Disk type. For any Single-Instance Virtual Machine using multiple disk types and for all Virtual Machines using the same Shared Disks of multiple types*, the lowest SLA of all the disks on the Virtual Machine will apply: *For example, given two Virtual Machines VM1 and VM2 using a Premium SSD Shared Disk and a Standard SSD Shared Disk, the uptime SLA for VM1 and VM2 will be the same as the SLA for a Single-Instance Virtual Machine using Standard SSD, as shown below. Uptime Percentage (Premium SSD, Premium SSD v2, and Ultra Disk)** Uptime Percentage (Standard SSD Managed Disk) Uptime Percentage (Standard HDD Managed Disk) Service Credit < 99.9% <99.5% <95% 10% < 99% <95% <92% 25% < 95% <90% <90% 100% **Premium SSD for all Operating System Disks, and Premium SSD, Premium SSD v2 or Ultra Disk for all Data Disks. Table of Contents / Definitions Azure Virtual Network Manager Additional Definitions \"Maximum Available Minutes\" is the total accumulated minutes during an Applic",
+     "match": {
+      "text_patterns": [
+       "Virtual Machines?\\b"
+      ]
+     },
+     "global": false,
+     "file": "azure_sla.txt",
+     "config_note": "Single-instance VM on Standard SSD (the Standard SSD column)."
+    },
+    {
+     "service": "Azure Storage",
+     "threshold_pct": 99.0,
+     "threshold_quote": "Service Credit – LRS, ZRS, GRS, GZRS, RA-GRS, & RA-GZRS (write requests) for Cool, Cold, and Archive Access Tiers Uptime Percentage Service Credit < 99% 10% < 98% 25% Service Credit – RA-GRS & RA-GZRS (read requests) Cool, Cold, and",
+     "tiers": [
+      {
+       "from_pct": 98.0,
+       "below_pct": 99.0,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 98.0,
+       "credit_pct": 25
+      }
+     ],
+     "tiers_quote": "Service Credit – LRS, ZRS, GRS, GZRS, RA-GRS, & RA-GZRS (write requests) for Cool, Cold, and Archive Access Tiers Uptime Percentage Service Credit < 99% 10% < 98% 25% Service Credit – RA-GRS & RA-GZRS (read requests) Cool, Cold, and",
+     "match": {
+      "text_patterns": [
+       "Azure Storage",
+       "Storage accounts?",
+       "Blob Storage"
+      ]
+     },
+     "global": false,
+     "file": "azure_sla.txt",
+     "config_note": "Cool/Cold/Archive write requests (lowest storage promise); Hot tier is 99.9%."
+    },
+    {
+     "service": "Azure SQL Database",
+     "threshold_pct": 99.99,
+     "threshold_quote": "of the SQL Database Service not configured for Zone Redundant Deployments: Uptime Percentage Service Credit < 99.99% 10% < 99% 25% < 95% 100% The following Service Levels and Service Credits ar",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.99,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "of the SQL Database Service not configured for Zone Redundant Deployments: Uptime Percentage Service Credit < 99.99% 10% < 99% 25% < 95% 100% The following Service Levels and Service Credits ar",
+     "match": {
+      "text_patterns": [
+       "SQL Database"
+      ]
+     },
+     "global": false,
+     "file": "azure_sla.txt"
+    },
+    {
+     "service": "Azure App Service",
+     "threshold_pct": 99.95,
+     "threshold_quote": "applicable to Customer’s use of Apps that don’t use Availability Zones: Uptime Percentage Service Credit < 99.95% 10% < 99% 25% < 95% 100% Additional Terms: Service Credits are applicable on",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.95,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "applicable to Customer’s use of Apps that don’t use Availability Zones: Uptime Percentage Service Credit < 99.95% 10% < 99% 25% < 95% 100% Additional Terms: Service Credits are applicable on",
+     "match": {
+      "text_patterns": [
+       "App Service"
+      ]
+     },
+     "global": false,
+     "file": "azure_sla.txt"
+    },
+    {
+     "service": "Azure Kubernetes Service",
+     "threshold_pct": 99.9,
+     "threshold_quote": "AKS Clusters that don't have Availability Zones enabled: Uptime Percentage Service Credit < 99.9% 10% < 99% 25% < 95% 100% Table of Contents / Definitions Azure Kubernetes Ser",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.9,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "AKS Clusters that don't have Availability Zones enabled: Uptime Percentage Service Credit < 99.9% 10% < 99% 25% < 95% 100% Table of Contents / Definitions Azure Kubernetes Ser",
+     "match": {
+      "text_patterns": [
+       "Azure Kubernetes Service",
+       "\\bAKS\\b"
+      ]
+     },
+     "global": false,
+     "file": "azure_sla.txt",
+     "config_note": "Standard tier clusters; the Free tier has no SLA."
+    },
+    {
+     "service": "Azure Functions",
+     "threshold_pct": 99.95,
+     "threshold_quote": "applicable to Customer’s use of Function App on the Consumption plan. Uptime Percentage Service Credit < 99.95% 10% < 99% 25% < 95% 100% Uptime Calculation and Service Levels for Function A",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.95,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 100
+      }
+     ],
+     "tiers_quote": "applicable to Customer’s use of Function App on the Consumption plan. Uptime Percentage Service Credit < 99.95% 10% < 99% 25% < 95% 100% Uptime Calculation and Service Levels for Function A",
+     "match": {
+      "text_patterns": [
+       "Azure Functions"
+      ]
+     },
+     "global": false,
+     "file": "azure_sla.txt"
+    },
+    {
+     "service": "Azure Cosmos DB",
+     "threshold_pct": 99.99,
+     "threshold_quote": "Service Credit for Provisioned Throughput Resources: Availability Percentage Service Credit < 99.99% 10% < 99% 25% \"Availability Percentage, single-region with availability zones (SR-AZ)\" for the Azure Cosmos DB Service deployed via D",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.99,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      }
+     ],
+     "tiers_quote": "Service Credit for Provisioned Throughput Resources: Availability Percentage Service Credit < 99.99% 10% < 99% 25% \"Availability Percentage, single-region with availability zones (SR-AZ)\" for the Azure Cosmos DB Service deployed via D",
+     "match": {
+      "text_patterns": [
+       "Cosmos DB"
+      ]
+     },
+     "global": false,
+     "file": "azure_sla.txt",
+     "config_note": "Single-region account, provisioned throughput."
+    },
+    {
+     "service": "Azure Load Balancer",
+     "threshold_pct": 99.99,
+     "threshold_quote": "applicable to Customer’s use of Azure Load Balancer: Uptime Percentage Service Credit < 99.99% 10% < 99.9% 25% Service Level Exceptions: No SLA is provided for Basic Load B",
+     "tiers": [
+      {
+       "from_pct": 99.9,
+       "below_pct": 99.99,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 99.9,
+       "credit_pct": 25
+      }
+     ],
+     "tiers_quote": "applicable to Customer’s use of Azure Load Balancer: Uptime Percentage Service Credit < 99.99% 10% < 99.9% 25% Service Level Exceptions: No SLA is provided for Basic Load B",
+     "match": {
+      "text_patterns": [
+       "\\bLoad Balancer\\b"
+      ]
+     },
+     "global": false,
+     "file": "azure_sla.txt",
+     "config_note": "Standard Load Balancer; Basic has no SLA."
+    },
+    {
+     "service": "Azure Service Bus",
+     "threshold_pct": 99.9,
+     "threshold_quote": "Queues and Topics in all tiers deployed outside regions with Availability Zone support: Uptime Percentage Service Credit < 99.9% 10% < 99% 25% The following Service Levels and Service Credits are applicable",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.9,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      }
+     ],
+     "tiers_quote": "Queues and Topics in all tiers deployed outside regions with Availability Zone support: Uptime Percentage Service Credit < 99.9% 10% < 99% 25% The following Service Levels and Service Credits are applicable",
+     "match": {
+      "text_patterns": [
+       "Service Bus"
+      ]
+     },
+     "global": false,
+     "file": "azure_sla.txt"
+    },
+    {
+     "service": "Azure Front Door",
+     "threshold_pct": 99.99,
+     "threshold_quote": "applicable to Customer’s use of Azure Front Door and Azure Front Door (classic): Uptime Percentage Service Credit < 99.99% 10% < 99.9% 25% Table of Contents / Definitions Azure Functions Additional De",
+     "tiers": [
+      {
+       "from_pct": 99.9,
+       "below_pct": 99.99,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 99.9,
+       "credit_pct": 25
+      }
+     ],
+     "tiers_quote": "applicable to Customer’s use of Azure Front Door and Azure Front Door (classic): Uptime Percentage Service Credit < 99.99% 10% < 99.9% 25% Table of Contents / Definitions Azure Functions Additional De",
+     "match": {
+      "text_patterns": [
+       "Front Door"
+      ]
+     },
+     "global": true,
+     "file": "azure_sla.txt"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Only incidents Microsoft published a Post Incident Review for are in its public history; smaller incidents need your own logs."
+ ]
+}

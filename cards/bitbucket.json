@@ -1,0 +1,65 @@
+{
+ "vendor": "bitbucket",
+ "name": "Bitbucket",
+ "sla_url": "https://www.atlassian.com/legal/sla",
+ "sla_texts": [
+  {
+   "file": "atlassian.txt",
+   "sha256": "98251f91eb9e58e12bfb3e1f73e2315cfba5606d7eee6ff0f5d6dc4be16ee688"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "premium",
+   "label": "Bitbucket Premium",
+   "period": "month",
+   "customer_must_request": true,
+   "claim": {
+    "days_after_period_end": 15,
+    "channel": "Ticket at support.atlassian.com",
+    "quote": "within fifteen (15) days after the end of the calendar month in which the alleged failure occurred and provide"
+   },
+   "measure_quote": "“ Downtime Minute ” occurs when the Error Rate in a given minute is greater than 5%. “ Err",
+   "services": [
+    {
+     "service": "Bitbucket",
+     "threshold_pct": 99.9,
+     "threshold_quote": "Cloud Plan Service Level Commitment Premium 99.9% Enterprise 99.95% 2.",
+     "tiers": [
+      {
+       "from_pct": 99.0,
+       "below_pct": 99.9,
+       "credit_pct": 10
+      },
+      {
+       "from_pct": 95.0,
+       "below_pct": 99.0,
+       "credit_pct": 25
+      },
+      {
+       "from_pct": 0,
+       "below_pct": 95.0,
+       "credit_pct": 50
+      }
+     ],
+     "tiers_quote": "Premium Plan Cloud Products - Monthly Uptime Percentage Service Credit* Less than 99.9% but greater than or equal to 99.0% 10% Less than 99.0% but greater than or equal to 95.0% 25% Less than 95.0% 50% Notes: * Percentage of the monthly fees attribut",
+     "match": {
+      "components": [
+       "Website",
+       "Git via SSH",
+       "Git via HTTPS",
+       "Pipelines"
+      ]
+     },
+     "scope_quote": "Bitbucket (Premium) - Create Pull Request - Approve Pull Request - View Pull Request DIFF - Git Transactions SSH - Git Transactions HTTPS - Pipeline Started** C"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "Covered Experiences are browser-based only (except Bitbucket Git and JSM alerts); API, mobile and integrations are not covered.",
+  "Atlassian states its own monitoring is the sole source of truth for the claim."
+ ]
+}

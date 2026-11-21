@@ -1,0 +1,71 @@
+{
+ "vendor": "linode",
+ "name": "Linode (Akamai Cloud)",
+ "sla_url": "https://www.akamai.com/legal/sla-compute",
+ "sla_texts": [
+  {
+   "file": "linode_compute.txt",
+   "sha256": "96673aaa0a656f10735cdf3d7be8031636c9a6425d63fe9dd8bd18febff1deec"
+  },
+  {
+   "file": "linode_noncompute.txt",
+   "sha256": "a2fdf10b3642df1f2fc33a2f6569d1d430f7c1fa729002aefd4d57d53805e8f6"
+  }
+ ],
+ "checked_at": "2026-11-21",
+ "status": "checked",
+ "plans": [
+  {
+   "plan": "standard",
+   "label": "Akamai Cloud (Linode)",
+   "period": "month",
+   "customer_must_request": true,
+   "claim": {
+    "days_after_period_end": 30,
+    "channel": "Ticket to Linode Support (\"Service Credit Request\") with date, time and duration of each downtime",
+    "quote": "must inform Linode Support by opening a ticket (a “<u>Service Credit Request</u>”) within thirty (30) days from the end of the month in which the Uptime Guarantee was not satisfied. In each instance, a Service Credit Request must include a listing of the date, time, and duration of the Covered Service downtime experienced during"
+   },
+   "services": [
+    {
+     "service": "Compute instances",
+     "threshold_pct": 99.99,
+     "threshold_quote": "We guarantee (i) 99.99% monthly uptime for Covered Services in general availability and (ii) 99% monthly uptime for Cove",
+     "credit_formula": "pro_rata",
+     "credit_quote": "the Account Holder may request a pro-rata credit for any affected monthly billing period in which we are unable to satis",
+     "formula_note": "Pro-rata: credit = downtime minutes / minutes in month x the month's fee for the affected service.",
+     "match": {
+      "groups": [
+       "Regions"
+      ]
+     },
+     "scope_quote": "We guarantee (i) 99.99% monthly uptime for Covered Services"
+    },
+    {
+     "service": "Block Storage, Object Storage, NodeBalancers, Backups, LKE, DNS, Managed Databases",
+     "threshold_pct": 99.9,
+     "threshold_quote": "We guarantee 99.9% monthly Covered Services uptime (the \"Upt",
+     "credit_formula": "pro_rata",
+     "credit_quote": "pro-rata credit for any affected monthly billing period in which we are unable t",
+     "match": {
+      "groups": [
+       "Block Storage",
+       "NodeBalancers",
+       "Backups",
+       "Object Storage",
+       "Linode Kubernetes Engine"
+      ],
+      "components": [
+       "Hosted DNS Service",
+       "Managed Databases",
+       "Longview"
+      ]
+     },
+     "scope_quote": "We guarantee 99.9% monthly Covered Services uptime (the \"Upt"
+    }
+   ]
+  }
+ ],
+ "notes": [
+  "The live SLA page blocks automated fetches from our host; the text checked is the public archive copy of June 2026 (version line in the text)."
+ ]
+}
