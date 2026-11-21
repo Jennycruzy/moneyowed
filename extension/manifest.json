@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "MONEY OWED: SLA credits on invoices",
+  "short_name": "MONEY OWED",
+  "version": "1.0.0",
+  "description": "Click on an open vendor invoice email: see whether the vendor owes you an SLA credit for that period before you pay.",
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["https://moneyowed.38-49-216-59.sslip.io/*"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Check this invoice for SLA credits owed" },
+  "icons": { "128": "icon128.png" }
+}

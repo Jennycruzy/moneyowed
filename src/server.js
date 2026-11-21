@@ -162,6 +162,26 @@ function evidencePage() {
 ${minerSection()}
 <section id="not-covered"><h2>Vendors not covered, and why</h2><ul>${NOT_COVERED.map((n) => `<li><b>${esc(n.name)}</b>: ${esc(n.reason)}</li>`).join('')}</ul></section>`);
 }
+// A plainly labelled sample invoice email, for trying the extension without a real vendor invoice.
+const SAMPLE_FROM = { github: 'billing@github.com', jira: 'billing@atlassian.com', confluence: 'billing@atlassian.com', 'jira-service-management': 'billing@atlassian.com', bitbucket: 'billing@atlassian.com', vercel: 'billing@vercel.com', digitalocean: 'billing@digitalocean.com', twilio: 'billing@twilio.com', linode: 'billing@linode.com', mailgun: 'billing@mailgun.com', sanity: 'billing@sanity.io', prisma: 'billing@prisma.io', mapbox: 'billing@mapbox.com', buildkite: 'billing@buildkite.com' };
+function sampleInvoice() {
+  const rec = loadRecord();
+  const firstPlan = Object.fromEntries(listCards().map((c) => [c.vendor, c.plans[0].plan]));
+  const rows = (rec?.rows || []).filter((r) => r.owed && SAMPLE_FROM[r.vendor] && !r.period.includes('Q') && r.plan === firstPlan[r.vendor]);
+  const open = rows.filter((r) => r.deadline && new Date(r.deadline) > new Date());
+  const r = (open.length ? open : rows).sort((a, b) => (a.period < b.period ? 1 : -1))[0];
+  if (!r) return page('Sample invoice', '<section><p>No sample available right now.</p></section>');
+  const [y, mo] = r.period.split('-').map(Number);
+  const monthName = new Date(Date.UTC(y, mo - 1, 1)).toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+  return page('Sample invoice email', `<section><p class="k">MONEY OWED SAMPLE · not a real invoice · made by MONEY OWED to try the browser extension</p>
+<div data-from="${esc(SAMPLE_FROM[r.vendor])}" style="border:1px solid currentColor;padding:24px;max-width:560px;margin-top:16px">
+<p class="small">From: ${esc(r.vendor_name)} billing &lt;${esc(SAMPLE_FROM[r.vendor])}&gt; (sample)</p>
+<h1>${esc(r.vendor_name)} invoice for ${monthName} ${y}</h1>
+<p>${esc(r.plan_label)} subscription, ${monthName} 1 to end of month, ${y}.</p>
+<p><b>Total due: $2,000.00</b></p>
+<p class="small">MONEY OWED SAMPLE. With the extension installed, click its icon on this page. It reads this text the same way it reads an open Gmail message.</p></div></section>`);
+}
+
 function minerSection() {
   const read = (f) => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'miner', f), 'utf8')); } catch { return null; } };
   const reg = read('registration.json');
@@ -261,6 +281,13 @@ const server = http.createServer(async (req, res) => {
         if (status === 500) console.error('miner', e);
         return json(res, status, { error: { code: e.code || 'ERROR', message: status === 500 ? 'internal error' : e.message } });
       }
+    }
+    if (req.method === 'GET' && p === '/sample-invoice') return html(res, 200, sampleInvoice());
+    if (req.method === 'GET' && p === '/extension.zip') {
+      const f = path.join(ROOT, 'static', 'moneyowed-extension.zip');
+      if (!fs.existsSync(f)) return html(res, 404, page('Not found', '<p>Nothing here.</p>'));
+      res.writeHead(200, { 'content-type': 'application/zip', 'content-disposition': 'attachment; filename="moneyowed-extension.zip"' });
+      return fs.createReadStream(f).pipe(res);
     }
     if (req.method === 'GET' && p === '/miner.yaml') {
       const f = path.join(ROOT, 'miner', 'moneyowed-sla.yaml');
