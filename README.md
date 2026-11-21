@@ -14,6 +14,8 @@ In the 12 months to October 2026, 12 of the 17 vendors covered here broke their 
 
 The vendor pays only if the customer files a claim inside a short window (15 to 60 days), in the vendor's format, with the incidents listed. Almost nobody does.
 
+Public write-up with the GitHub and Jira numbers: [post on X](https://x.com/jennyoliver57/status/2124184069105705459).
+
 ## Try it in two minutes
 
 1. Open the site and run a check, for example **GitHub, 2026-Q3, bill $6,000**. You get the verdict, the dollar amount, the claim deadline, every incident in the period (counted or not, with the reason), the contract sentence with its numbers, and a drafted claim.
