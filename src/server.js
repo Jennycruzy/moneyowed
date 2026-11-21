@@ -11,6 +11,7 @@ import { openDb } from './db.js';
 import { Telegraph } from './telegraph.js';
 import { buySecondOpinions } from './evidence.js';
 import { page, esc, money, pct, dt, dayOnly, badge } from './views.js';
+import { landingData, renderLanding } from './landing.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.resolve(process.env.MONEYOWED_DATA || path.join(ROOT, 'data'));
@@ -164,7 +165,19 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   const p = url.pathname;
   try {
-    if (req.method === 'GET' && p === '/') return html(res, 200, home());
+    if (req.method === 'GET' && p === '/') {
+      try { return html(res, 200, renderLanding(landingData(DATA, db), { vendorsOptions: listCards().map((c) => `<option value="${esc(c.vendor)}">${esc(c.name)}</option>`).join('') })); }
+      catch (e) { console.error('landing', e); return html(res, 200, home()); }
+    }
+    if (req.method === 'GET' && p === '/check') return html(res, 200, home());
+    if (req.method === 'GET' && p.startsWith('/static/')) {
+      const rel = path.normalize(p.slice('/static/'.length)).replace(/^(\.\.[/\\])+/, '');
+      const f = path.join(ROOT, 'static', rel);
+      if (!f.startsWith(path.join(ROOT, 'static') + path.sep) || !fs.existsSync(f) || !fs.statSync(f).isFile()) return html(res, 404, page('Not found', '<p>Nothing here.</p>'));
+      const type = { '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp' }[path.extname(f)] || 'application/octet-stream';
+      res.writeHead(200, { 'content-type': type, 'cache-control': 'public, max-age=3600' });
+      return fs.createReadStream(f).pipe(res);
+    }
     if (req.method === 'GET' && p === '/health') {
       const stat = VENDORS.map((v) => { const f = path.join(DATA, 'incidents', `${v.vendor}.json`); return { vendor: v.vendor, collected_at: fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')).collected_at : null }; });
       return json(res, 200, { ok: true, method: METHOD_VERSION, telegraph: Boolean(tg), wallet: tg?.from || null, spent_today_usd: db.spentToday(null), vendors: stat });
