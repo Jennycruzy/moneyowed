@@ -20,7 +20,7 @@ export async function buySecondOpinions(tg, result, { bucket, checkId, ownMinerI
       const cached = reuse?.(q, p.minerId);
       const purchase = cached || await tg.ask(q, { minerId: p.minerId, bucket, checkId });
       if (purchase.miner_id) asked.add(String(purchase.miner_id));
-      out.push({ ...compare(purchase, result, s, q), label: p.label, reused: Boolean(cached) });
+      out.push({ ...compare(purchase, result, s, q, { own: ownMinerId && String(purchase.miner_id) === String(ownMinerId) }), label: p.label, reused: Boolean(cached) });
     } catch (e) {
       if (e instanceof SpendLimitError) { out.push({ label: p.label, error: e.message, code: 'LIMIT_REACHED' }); break; }
       out.push({ label: p.label, error: e.message });
@@ -29,14 +29,15 @@ export async function buySecondOpinions(tg, result, { bucket, checkId, ownMinerI
   return { question: q, opinions: out };
 }
 
-export function compare(purchase, result, service, question) {
+export function compare(purchase, result, service, question, { own = false } = {}) {
   const base = { miner_id: purchase.miner_id, miner_name: purchase.miner_name, route: purchase.route, cost_usd: purchase.cost_usd, latency_ms: purchase.latency_ms, answer_sha256: purchase.answer_sha256 };
   if (purchase.status !== 200) return { ...base, agrees: null, notes: [`not answered: ${String(purchase.error || `HTTP ${purchase.status}`).slice(0, 160)} (not charged)`], raw: null };
   const a = readSlaAnswer(purchase.answer);
   if (a.uptime_pct === null && a.compliant === null) return { ...base, agrees: null, period_label: a.period_label, notes: ['paid, but the answer carried no uptime figure and no verdict'], raw: purchase.answer };
   const notes = [];
   if (a.period_label && !String(a.period_label).includes(question.params.period.slice(0, 7)) && /last|rolling|90|30 days/i.test(String(a.period_label))) notes.push(`answered for "${a.period_label}", not the period asked`);
-  if (!a.incidents_listed) notes.push('no incident list, so the SLA scope cannot be applied to it');
+  if (own) notes.push('ours, same counting rules as this page; Telegraph passes on the five standard fields, the full incident list is at /miner/sla');
+  else if (!a.incidents_listed) notes.push('no incident list, so the SLA scope cannot be applied to it');
   const ourCompliant = service.uptime_pct >= service.threshold_pct;
   let agrees = null;
   if (a.compliant !== null) agrees = a.compliant === ourCompliant;
