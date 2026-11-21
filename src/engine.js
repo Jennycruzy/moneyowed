@@ -29,6 +29,7 @@ function statuspageSelector(service, groupsById, mode) {
   return (inc) => {
     if (inc.scheduled) return { in_scope: false, reason: 'scheduled maintenance (excluded by the SLA)' };
     const comps = (inc.components || []).filter(covered);
+    if (mode === 'naive' && comps.length) return { in_scope: true, reason: `${comps.map((c) => c.name).join(', ')} named (whole incident, any status)` };
     if (!comps.length) {
       const listed = (inc.components || []).map((c) => c.name).slice(0, 4).join(', ') || 'no component named';
       return { in_scope: false, reason: `not a covered service (${listed})` };
@@ -78,7 +79,7 @@ function cloudSelector(source, service, regions, mode) {
       const loc = inc.locations[0];
       if (loc === 'global' && !['global', '', ...regions].includes(inc.event_region)) return { in_scope: false, reason: `event in ${inc.event_region}, not one of your regions` };
       if (loc !== 'global' && !regions.includes(loc)) return { in_scope: false, reason: `region ${loc} is not one of yours` };
-      if (!inc.disruption) return { in_scope: false, reason: `AWS status ${inc.max_status === 1 ? '1 (informational)' : inc.max_status === 2 ? '2 (degradation)' : inc.max_status}, not a service disruption` };
+      if (!inc.disruption && mode !== 'naive') return { in_scope: false, reason: `AWS status ${inc.max_status === 1 ? '1 (informational)' : inc.max_status === 2 ? '2 (degradation)' : inc.max_status}, not a service disruption` };
       return { in_scope: true, reason: `${inc.service_name} in ${loc}, marked service disruption`, windows: inc.windows };
     }
     if (source === 'gcp') {
@@ -86,7 +87,7 @@ function cloudSelector(source, service, regions, mode) {
       const hit = (inc.locations || []).filter((l) => regionMatches(l, regions));
       if (!hit.length) return { in_scope: false, reason: `locations ${(inc.locations || []).join(', ') || 'none listed'} are not yours` };
       const outage = inc.status_impact ? inc.status_impact === 'SERVICE_OUTAGE' : inc.impact === 'high';
-      if (!outage) return { in_scope: false, reason: `Google labels it ${inc.status_impact || `severity ${inc.impact}`} (degradation), not SERVICE_OUTAGE` };
+      if (!outage && mode !== 'naive') return { in_scope: false, reason: `Google labels it ${inc.status_impact || `severity ${inc.impact}`} (degradation), not SERVICE_OUTAGE` };
       return { in_scope: true, reason: `${m.cloud_products[0]} in ${hit.join(', ')}, labelled SERVICE_OUTAGE by Google` };
     }
     if (source === 'azure') {
@@ -96,7 +97,7 @@ function cloudSelector(source, service, regions, mode) {
       const hit = regions.filter((r) => (r === 'East US' ? /East US(?! 2)/.test(t) : t.includes(r)));
       if (!hit.length && !service.global) return { in_scope: false, reason: 'none of your regions named in the incident review' };
       const impact = impactStatement(t);
-      if (!UNAVAILABLE.test(impact)) return { in_scope: false, reason: 'the review\'s impact statement describes degradation, not unavailability' };
+      if (!UNAVAILABLE.test(impact) && mode !== 'naive') return { in_scope: false, reason: 'the review\'s impact statement describes degradation, not unavailability' };
       return { in_scope: true, reason: `named in review ${inc.id}${hit.length ? ` (${hit.join(', ')})` : ''}` };
     }
     return { in_scope: false, reason: 'unknown source' };
@@ -204,7 +205,8 @@ export function checkCredit(input, { slaDir = path.resolve(process.env.MONEYOWED
   const regions = input.regions || [];
   if (plan.per_region && !regions.length) throw new CheckError('BAD_INPUT', `${card.name} credits are per region; say which regions you use (e.g. us-east-1).`);
   const groupsById = new Map((store.components || []).filter((c) => c.group).map((c) => [c.id, c.name]));
-  const mode = input.mode === 'lower' ? 'lower' : 'upper';
+  // 'naive' = the common wrong method (any status, whole incident). Used only to build evaluation contrasts, never for a verdict.
+  const mode = ['lower', 'naive'].includes(input.mode) ? input.mode : 'upper';
 
   const services = [];
   for (const s of plan.services) {
