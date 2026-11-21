@@ -182,3 +182,14 @@ test('deadline rules', () => {
   assert.equal(claimDeadline({ days_after_incident: 60 }, { periodEnd: pe, firstIncidentStart: new Date('2026-10-10T00:00:00Z') }).date.toISOString(), '2026-12-09T00:00:00.000Z');
   assert.equal(claimDeadline({ days_after_eligible: 30 }, { periodEnd: pe, breachAt: null }).date, null);
 });
+
+test('gcp: an incident Google tags "global" plus one region counts only in that region', () => {
+  const inc = (id, locations) => ({ vendor: 'gcp', source: 'gcp', id, name: id, impact: 'high', status_impact: 'SERVICE_OUTAGE', scheduled: false,
+    start: '2026-08-20T15:40:00.000Z', end: '2026-08-20T19:20:00.000Z', services: ['Google Compute Engine'], locations, url: `https://example/${id}` });
+  writeIncidents('gcp', { source: 'gcp', coverage_from: '2025-10-01T00:00:00.000Z', incidents: [inc('west', ['global', 'us-west1']), inc('everywhere', ['global'])] });
+  const ce = (regions) => checkCredit({ vendor: 'gcp', period: '2026-08', regions, now: NOW }).services.find((s) => s.service === 'Compute Engine');
+  const central = ce(['us-central1']);
+  assert.deepEqual(central.incidents.filter((i) => i.in_scope).map((i) => i.id), ['everywhere']);
+  const west = ce(['us-west1']);
+  assert.deepEqual(west.incidents.filter((i) => i.in_scope).map((i) => i.id).sort(), ['everywhere', 'west']);
+});

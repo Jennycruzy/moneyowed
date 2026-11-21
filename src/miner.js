@@ -149,6 +149,7 @@ export function answerSla(q, { now = new Date() } = {}) {
   const periodText = q.period ?? (q.service ? '' : (String(q.question || q.query || '').match(/(last|past|previous)\s+\d*\s*\w+|\d{4}-q[1-4]|q[1-4]\s+\d{4}|\d{4}-\d{2}-\d{2}\s*(to|until|through)\s*\d{4}-\d{2}-\d{2}|\d{4}-\d{2}(?!-)|(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{4}/i) || [''])[0]);
   const { card, plan, service, regions, defaulted } = parseService(serviceText, q.plan);
   const p = parsePeriod(periodText, now);
+  if (p.start >= now) throw new CheckError('BAD_INPUT', `period "${String(periodText).slice(0, 60)}" has not started yet; uptime can only be measured for past time.`);
   const notes = [];
   if (defaulted && plan.services.length > 1) notes.push(`No covered service named; answered for "${service.service}". Others on this plan: ${plan.services.slice(1).map((s) => s.service).join(', ')}.`);
   if (card.plans.length > 1) notes.push(`Plan read as ${plan.label}; ${card.plans.filter((x) => x !== plan).map((x) => x.label).join(', ')} also has an SLA.`);

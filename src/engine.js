@@ -84,7 +84,10 @@ function cloudSelector(source, service, regions, mode) {
     }
     if (source === 'gcp') {
       if (!(inc.services || []).some((s) => m.cloud_products.includes(s))) return { in_scope: false, reason: 'product not named in the incident' };
-      const hit = (inc.locations || []).filter((l) => regionMatches(l, regions));
+      // Google adds "global" next to the regions it names (global products such as IAM); then only the named regions count.
+      const locs = inc.locations || [];
+      const named = locs.filter((l) => l !== 'global');
+      const hit = (named.length ? named : locs).filter((l) => regionMatches(l, regions));
       if (!hit.length) return { in_scope: false, reason: `locations ${(inc.locations || []).join(', ') || 'none listed'} are not yours` };
       const outage = inc.status_impact ? inc.status_impact === 'SERVICE_OUTAGE' : inc.impact === 'high';
       if (!outage && mode !== 'naive') return { in_scope: false, reason: `Google labels it ${inc.status_impact || `severity ${inc.impact}`} (degradation), not SERVICE_OUTAGE` };

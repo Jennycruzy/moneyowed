@@ -18,7 +18,7 @@
   },
   {
    "miner": "20260828",
-   "name": "PREFLIGHT Infrastructure Signals",
+   "name": "Miner 20260828",
    "own": false,
    "asked": 17,
    "answered": 12,
@@ -31,7 +31,7 @@
   },
   {
    "miner": "781307",
-   "name": "Upptime Public HTTP Availability",
+   "name": "Miner 781307",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -44,7 +44,7 @@
   },
   {
    "miner": "781308",
-   "name": "Public Homepage Availability — Bounded Day Windows",
+   "name": "Miner 781308",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -57,7 +57,7 @@
   },
   {
    "miner": "781306",
-   "name": "GitHub Component Uptime Research Candidate",
+   "name": "Miner 781306",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -70,7 +70,7 @@
   },
   {
    "miner": "103002",
-   "name": "GitHub Summary SLA",
+   "name": "Miner 103002",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -83,7 +83,7 @@
   },
   {
    "miner": "103008",
-   "name": "HTTPBin Probe SLA",
+   "name": "Miner 103008",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -96,7 +96,7 @@
   },
   {
    "miner": "5530",
-   "name": "Telegraph Verity Intelligence",
+   "name": "Miner 5530",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -109,7 +109,7 @@
   },
   {
    "miner": "1900999000",
-   "name": "ReferenceForge",
+   "name": "Miner 1900999000",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -122,7 +122,7 @@
   },
   {
    "miner": "9002",
-   "name": "TxLens",
+   "name": "Miner 9002",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -135,7 +135,7 @@
   },
   {
    "miner": "7410311",
-   "name": "Statuspage SLA Auditor",
+   "name": "Miner 7410311",
    "own": false,
    "asked": 17,
    "answered": 2,
@@ -148,7 +148,7 @@
   },
   {
    "miner": "103005",
-   "name": "Discord Status SLA",
+   "name": "Miner 103005",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -161,7 +161,7 @@
   },
   {
    "miner": "103006",
-   "name": "Discord Status Only",
+   "name": "Miner 103006",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -174,7 +174,7 @@
   },
   {
    "miner": "103003",
-   "name": "Cloudflare Status SLA",
+   "name": "Miner 103003",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -187,7 +187,7 @@
   },
   {
    "miner": "103004",
-   "name": "Cloudflare Summary SLA",
+   "name": "Miner 103004",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -200,7 +200,7 @@
   },
   {
    "miner": "302",
-   "name": "ChainSight — Universal Intelligence & Data Oracle",
+   "name": "Miner 302",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -213,7 +213,7 @@
   },
   {
    "miner": "103001",
-   "name": "GitHub Status SLA",
+   "name": "Miner 103001",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -226,7 +226,7 @@
   },
   {
    "miner": "103007",
-   "name": "Stripe Status SLA",
+   "name": "Miner 103007",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -239,7 +239,7 @@
   },
   {
    "miner": "103010",
-   "name": "GitHub Components SLA",
+   "name": "Miner 103010",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -252,7 +252,7 @@
   },
   {
    "miner": "781346",
-   "name": "Source-Verified Whole-Day Availability Durations",
+   "name": "Miner 781346",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -265,7 +265,7 @@
   },
   {
    "miner": "781347",
-   "name": "Exact Public HTTP Monitoring Availability",
+   "name": "Miner 781347",
    "own": false,
    "asked": 17,
    "answered": 0,
@@ -278,7 +278,7 @@
   },
   {
    "miner": "7606",
-   "name": "ShipWire SLA Compliance",
+   "name": "Miner 7606",
    "own": false,
    "asked": 17,
    "answered": 0,

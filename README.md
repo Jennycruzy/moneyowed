@@ -2,9 +2,9 @@
 
 **Your vendors promise uptime in writing. When they miss it, they owe you money, but only if you ask in time. MONEY OWED finds those credits, proves them incident by incident, and drafts the claim.**
 
-Live: **https://moneyowed.38-49-216-59.sslip.io** · Telegram: **@moneyowed_claims_bot** · Telegraph miner: **2611217** (`moneyowed-sla`)
+Live: **https://moneyowed.38-49-216-59.sslip.io** · Telegram: **@moneyowed_claims_bot** · Telegraph miner: **2611217** (`moneyowed-sla`, [its own repository](https://github.com/Jennycruzy/moneyowed-sla))
 
-In the 12 months to October 2026, 13 of the 17 vendors covered here broke their written uptime promise at least once, for a total of **52 vendor-periods where customers were owed a credit**. A few examples:
+In the 12 months to October 2026, 12 of the 17 vendors covered here broke their written uptime promise at least once, for a total of **51 vendor-periods where customers were owed a credit**. A few examples:
 
 | Vendor, plan | Period | Uptime on covered services | Promise | Credit owed |
 |---|---|---|---|---|
@@ -40,7 +40,7 @@ The vendor pays only if the customer files a claim inside a short window (15 to 
 MONEY OWED uses Telegraph in two directions.
 
 - **As a buyer.** Each check buys `SLA_COMPLIANCE_GENERAL` answers through the escrow payment path: one from Telegraph's own routing plus direct picks from ranked SLA miners, at $0.01 each. Every purchase is stored with miner, route, cost, latency and answer hash, and shown beside the contract-scoped result, with disagreements explained. Spending limits per user and per day, and a fresh answer to the same question is reused for an hour instead of being bought twice. All purchases: [/purchases.json](https://moneyowed.38-49-216-59.sslip.io/purchases.json).
-- **As a miner.** The same engine answers `SLA_COMPLIANCE_GENERAL` for any Telegraph buyer as miner **2611217**: 17 vendors, any past window ("last 30 days", "2026-10", "2026-Q3", date ranges), plus the credit and claim deadline when a whole billing period is asked, and every incident with whether it counted and why. Miner file: [miner.yaml](https://moneyowed.38-49-216-59.sslip.io/miner.yaml) (its sha256 is stored on chain). Try it directly: [/miner/sla?service=GitHub&period=2026-Q3](https://moneyowed.38-49-216-59.sslip.io/miner/sla?service=GitHub&period=2026-Q3). The app labels this miner as ours wherever it shows its answer.
+- **As a miner.** The same engine answers `SLA_COMPLIANCE_GENERAL` for any Telegraph buyer as miner **2611217**. Try it directly: [/miner/sla?service=GitHub&period=2026-Q3](https://moneyowed.38-49-216-59.sslip.io/miner/sla?service=GitHub&period=2026-Q3). The app labels this miner as ours wherever it shows its answer. The miner's registration, its daily public accuracy check and our evaluation material for this intent are in **[moneyowed-sla](https://github.com/Jennycruzy/moneyowed-sla)** (Miners and Evaluators entries).
 
 ## Where it runs
 

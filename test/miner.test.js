@@ -79,3 +79,8 @@ test('answer: only vendor-marked outage on covered parts counts; billing period 
   const g = answerSla({ question: 'Did GitHub meet its SLA in Q3 2026?' }, { now: NOW });
   assert.equal(g.period, '2026-Q3');
 });
+
+test('a period that has not started yet is refused, not answered as 100%', async () => {
+  const { answerSla } = await import('../src/miner.js');
+  assert.throws(() => answerSla({ service: 'github', period: '2027-03' }, { now: new Date('2026-11-21T12:00:00Z') }), /has not started yet/);
+});
