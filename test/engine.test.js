@@ -66,7 +66,14 @@ test('per-component timing wins over the incident window', () => {
     { components: ['Viewing content', 'Automation for Jira'] })]);
   const r = checkCredit({ vendor: 'jira', plan: 'premium', period: '2026-06', spend: 2000, now: NOW });
   assert.equal(r.services[0].covered_minutes, 0);
-  assert.match(r.services[0].incidents[0].reason, /own timing marks no outage/);
+  assert.match(r.services[0].incidents[0].reason, /status updates mark them no outage/);
+});
+
+test('a "major" incident whose parts the vendor marked only degraded does not count', () => {
+  seed('jira', [sp('d', 'slow', new Date('2026-06-01T00:00:00Z'), new Date('2026-06-01T06:00:00Z'), 'major', [], { components: ['Viewing content'], component_statuses_published: true })]);
+  const r = checkCredit({ vendor: 'jira', plan: 'premium', period: '2026-06', spend: 2000, now: NOW });
+  assert.equal(r.services[0].covered_minutes, 0);
+  assert.match(r.services[0].incidents[0].reason, /degraded or operational, never down/);
 });
 
 test('lower mode counts only major outages; upper counts partial too', () => {
@@ -154,7 +161,8 @@ test('sanity months start at midnight CET', () => {
 
 test('clouds need regions; out-of-region incidents are excluded with a reason', () => {
   writeIncidents('aws', { source: 'aws', incidents: [
-    { vendor: 'aws', source: 'aws', id: 'e1', name: 'EC2 errors', impact: '2', start: new Date('2026-10-01T00:00:00Z'), end: new Date('2026-10-01T05:00:00Z'), windows: [{ start: new Date('2026-10-01T00:00:00Z'), end: new Date('2026-10-01T05:00:00Z') }], service_key: 'ec2', service_name: 'Amazon EC2', locations: ['us-east-1'], event_region: 'us-east-1' },
+    { vendor: 'aws', source: 'aws', id: 'e1', name: 'EC2 errors', impact: '2', start: new Date('2026-10-01T00:00:00Z'), end: new Date('2026-10-01T05:00:00Z'), windows: [{ start: new Date('2026-10-01T00:00:00Z'), end: new Date('2026-10-01T05:00:00Z') }], service_key: 'ec2', service_name: 'Amazon EC2', locations: ['us-east-1'], event_region: 'us-east-1', disruption: true, max_status: 3 },
+    { vendor: 'aws', source: 'aws', id: 'e3', name: 'EC2 slow', impact: '2', start: new Date('2026-10-05T00:00:00Z'), end: new Date('2026-10-05T09:00:00Z'), windows: [], service_key: 'ec2', service_name: 'Amazon EC2', locations: ['us-east-1'], event_region: 'us-east-1', disruption: false, max_status: 2 },
     { vendor: 'aws', source: 'aws', id: 'e2', name: 'EC2 errors', impact: '3', start: new Date('2026-10-03T00:00:00Z'), end: new Date('2026-10-03T05:00:00Z'), windows: [{ start: new Date('2026-10-03T00:00:00Z'), end: new Date('2026-10-03T05:00:00Z') }], service_key: 'ec2', service_name: 'Amazon EC2', locations: ['ap-south-1'], event_region: 'ap-south-1' },
   ] });
   assert.throws(() => checkCredit({ vendor: 'aws', period: '2026-10', now: NOW }), (e) => e.code === 'BAD_INPUT');
@@ -163,6 +171,7 @@ test('clouds need regions; out-of-region incidents are excluded with a reason', 
   assert.equal(ec2.covered_minutes, 300);
   assert.equal(ec2.credit_pct, 10);
   assert.match(ec2.incidents.find((i) => i.id === 'e2').reason, /ap-south-1 is not one of yours/);
+  assert.match(ec2.incidents.find((i) => i.id === 'e3').reason, /2 \(degradation\), not a service disruption/);
   assert.equal(r.deadline.toISOString(), '2027-01-01T00:00:00.000Z');
 });
 

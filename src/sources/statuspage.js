@@ -51,18 +51,20 @@ export function normalizeStatuspageIncident(vendor, i, sha256 = null, host = '')
       const now = ac.new_status;
       const cur = open.get(key);
       if (OUTAGE.has(now)) {
-        if (!cur) open.set(key, { component: ac.name, start: t, worst: now });
+        if (!cur) open.set(key, { component: ac.name, component_id: ac.code || null, start: t, worst: now });
         else if (now === 'major_outage') cur.worst = 'major_outage';
       } else if (cur) {
-        windows.push({ component: cur.component, start: cur.start, end: t, status: cur.worst });
+        windows.push({ component: cur.component, component_id: cur.component_id, start: cur.start, end: t, status: cur.worst });
         open.delete(key);
       }
     }
   }
-  for (const cur of open.values()) windows.push({ component: cur.component, start: cur.start, end: end || cur.start, status: cur.worst, open_at_resolve: true });
+  for (const cur of open.values()) windows.push({ component: cur.component, component_id: cur.component_id, start: cur.start, end: end || cur.start, status: cur.worst, open_at_resolve: true });
+  const statusesPublished = updates.some((u) => (u.affected_components || []).length > 0);
   return {
     vendor,
     source: 'statuspage',
+    component_statuses_published: statusesPublished,
     id: i.id || i.code,
     name: i.name,
     impact: i.impact,

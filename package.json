@@ -3,10 +3,15 @@
   "version": "0.1.0",
   "description": "Finds the service credits your cloud and software vendors owe you when they miss their uptime promise, proves it incident by incident, and drafts the claim.",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --test test/*.test.js",
     "collect": "node scripts/collect.js"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "viem": "^2.58.4"
+  }
 }

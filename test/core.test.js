@@ -111,7 +111,7 @@ test('aws per-service windows from status changes; region parsed from key', () =
     event_log: [{ timestamp: 1794746282, status: '1' }, { timestamp: 1794754409, status: '0' }],
     impacted_services: { 'elb-us-east-1': { service_name: 'Amazon Elastic Load Balancing', max: '2' } },
     impacted_service_status_changes: [
-      { service: 'elb-us-east-1', current_status: '2', timestamp: 1794746282000 },
+      { service: 'elb-us-east-1', current_status: '3', timestamp: 1794746282000 },
       { service: 'elb-us-east-1', current_status: '0', timestamp: 1794749882000 },
     ],
   }] };
@@ -120,6 +120,12 @@ test('aws per-service windows from status changes; region parsed from key', () =
   assert.deepEqual(r.locations, ['us-east-1']);
   assert.equal(r.event_region, 'us-east-1');
   assert.equal((r.windows[0].end - r.windows[0].start) / 60000, 60);
+  assert.equal(r.disruption, true);
+  // status 2 (degradation) alone is not downtime
+  data['multipleservices-us-east-1'][0].impacted_service_status_changes[0].current_status = '2';
+  const [d] = normalizeAws('aws', data);
+  assert.equal(d.disruption, false);
+  assert.equal(d.windows.length, 0);
 });
 
 test('gcp products and locations', () => {

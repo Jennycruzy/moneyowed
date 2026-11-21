@@ -33,13 +33,16 @@ function statuspageSelector(service, groupsById, mode) {
       const listed = (inc.components || []).map((c) => c.name).slice(0, 4).join(', ') || 'no component named';
       return { in_scope: false, reason: `not a covered service (${listed})` };
     }
+    // Update streams name a grouped part "Group - Part"; match on the part's id, falling back to its bare name.
+    const compIds = new Set(comps.map((c) => c.id));
     const compNames = new Set(comps.map((c) => c.name));
-    const wins = (inc.component_windows || []).filter((w) => compNames.has(w.component) && (mode === 'upper' ? OUTAGE.has(w.status) : w.status === 'major_outage'));
+    const isCovered = (w) => (w.component_id && compIds.has(w.component_id)) || compNames.has(w.component) || compNames.has(String(w.component).split(' - ').slice(1).join(' - '));
+    const wins = (inc.component_windows || []).filter((w) => isCovered(w) && (mode === 'upper' ? OUTAGE.has(w.status) : w.status === 'major_outage'));
     if (wins.length) {
       return { in_scope: true, reason: `${[...new Set(wins.map((w) => w.component))].join(', ')} marked ${[...new Set(wins.map((w) => w.status.replace('_', ' ')))].join(' / ')}`, windows: wins };
     }
-    if ((inc.component_windows || []).length) {
-      return { in_scope: false, reason: `${comps.map((c) => c.name).join(', ')} listed, but the vendor's own timing marks no outage on them (only ${[...new Set(inc.component_windows.map((w) => w.component))].slice(0, 3).join(', ')})` };
+    if (inc.component_statuses_published || (inc.component_windows || []).length) {
+      return { in_scope: false, reason: `${comps.map((c) => c.name).join(', ')} listed, but the vendor's own status updates mark them ${(inc.component_windows || []).length ? `no outage (outage only on ${[...new Set(inc.component_windows.map((w) => w.component))].slice(0, 3).join(', ')})` : 'degraded or operational, never down'}` };
     }
     const strong = mode === 'upper' ? ['major', 'critical'] : ['critical'];
     if (strong.includes(inc.impact) && inc.end) {
@@ -49,6 +52,13 @@ function statuspageSelector(service, groupsById, mode) {
   };
 }
 
+const UNAVAILABLE = /\b(unavailab\w*|outages?|unable to|could not|couldn't|failed to|loss of|lost (network )?connectivity|inaccessible|not (be )?(reachable|accessible))/i;
+// The customer-impact statement of an Azure PIR: the first two sentences after "What happened?".
+function impactStatement(t) {
+  const i = t.indexOf('What happened');
+  const body = i >= 0 ? t.slice(i + 14) : t;
+  return body.split(/(?<=\.)\s+/).slice(0, 2).join(' ');
+}
 const toRe = (p) => { const m = /^\(\?i\)(.*)$/.exec(p); return m ? new RegExp(m[1], 'i') : new RegExp(p); };
 
 function regionMatches(loc, wanted) {
@@ -68,15 +78,16 @@ function cloudSelector(source, service, regions, mode) {
       const loc = inc.locations[0];
       if (loc === 'global' && !['global', '', ...regions].includes(inc.event_region)) return { in_scope: false, reason: `event in ${inc.event_region}, not one of your regions` };
       if (loc !== 'global' && !regions.includes(loc)) return { in_scope: false, reason: `region ${loc} is not one of yours` };
-      if (mode === 'lower' && inc.impact !== '3') return { in_scope: false, reason: 'not marked as a service disruption (AWS status 3)' };
-      return { in_scope: true, reason: `${inc.service_name} in ${loc}`, windows: inc.windows };
+      if (!inc.disruption) return { in_scope: false, reason: `AWS status ${inc.max_status === 1 ? '1 (informational)' : inc.max_status === 2 ? '2 (degradation)' : inc.max_status}, not a service disruption` };
+      return { in_scope: true, reason: `${inc.service_name} in ${loc}, marked service disruption`, windows: inc.windows };
     }
     if (source === 'gcp') {
       if (!(inc.services || []).some((s) => m.cloud_products.includes(s))) return { in_scope: false, reason: 'product not named in the incident' };
       const hit = (inc.locations || []).filter((l) => regionMatches(l, regions));
       if (!hit.length) return { in_scope: false, reason: `locations ${(inc.locations || []).join(', ') || 'none listed'} are not yours` };
-      if (mode === 'lower' && inc.impact !== 'high') return { in_scope: false, reason: `severity "${inc.impact}", not "high"` };
-      return { in_scope: true, reason: `${m.cloud_products[0]} in ${hit.join(', ')}` };
+      const outage = inc.status_impact ? inc.status_impact === 'SERVICE_OUTAGE' : inc.impact === 'high';
+      if (!outage) return { in_scope: false, reason: `Google labels it ${inc.status_impact || `severity ${inc.impact}`} (degradation), not SERVICE_OUTAGE` };
+      return { in_scope: true, reason: `${m.cloud_products[0]} in ${hit.join(', ')}, labelled SERVICE_OUTAGE by Google` };
     }
     if (source === 'azure') {
       if (!inc.start || !inc.end) return { in_scope: false, reason: inc.parse_error || 'no impact window' };
@@ -84,7 +95,8 @@ function cloudSelector(source, service, regions, mode) {
       if (!m.text_patterns.some((p) => new RegExp(p).test(t))) return { in_scope: false, reason: 'service not named in the incident review' };
       const hit = regions.filter((r) => (r === 'East US' ? /East US(?! 2)/.test(t) : t.includes(r)));
       if (!hit.length && !service.global) return { in_scope: false, reason: 'none of your regions named in the incident review' };
-      if (mode === 'lower' && !/\b(unavailab|outage|unable to|could not|failed to|loss of)/i.test(t)) return { in_scope: false, reason: 'review describes degradation, not unavailability' };
+      const impact = impactStatement(t);
+      if (!UNAVAILABLE.test(impact)) return { in_scope: false, reason: 'the review\'s impact statement describes degradation, not unavailability' };
       return { in_scope: true, reason: `named in review ${inc.id}${hit.length ? ` (${hit.join(', ')})` : ''}` };
     }
     return { in_scope: false, reason: 'unknown source' };

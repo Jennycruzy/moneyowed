@@ -15,9 +15,10 @@ export async function collectGcp({ vendor }, archive) {
 export function normalizeGcp(vendor, x, sha256 = null) {
   const locs = [...(x.previously_affected_locations || []), ...(x.currently_affected_locations || [])].map((l) => l.id);
   return {
-    vendor, source: 'gcp', id: x.id, name: (x.external_desc || '').slice(0, 200), impact: x.severity,
+    vendor, source: 'gcp', id: x.id, name: (x.external_desc || '').slice(0, 200), impact: x.severity, status_impact: x.status_impact || null,
     scheduled: false, start: toDate(x.begin), end: toDate(x.end),
     services: (x.affected_products || []).map((p) => p.title), locations: [...new Set(locs)],
+    text: [x.external_desc || '', ...(x.updates || []).map((u) => u.text || '')].join('\n').slice(0, 8000),
     url: x.uri ? `https://status.cloud.google.com/${x.uri}` : null, sha256,
   };
 }
@@ -44,19 +45,22 @@ export function normalizeAws(vendor, data, sha256 = null) {
       const imp = ev.impacted_services || { [key]: { service_name: key, max: ev.status } };
       for (const [svcKey, info] of Object.entries(imp)) {
         const changes = (ev.impacted_service_status_changes || []).filter((c) => c.service === svcKey).sort((a, b) => a.timestamp - b.timestamp);
+        // AWS status: 1 informational, 2 degradation, 3 disruption. Only disruption counts as downtime.
         const windows = [];
         let open = null;
         for (const c of changes) {
           const t = toDate(c.timestamp);
-          if (Number(c.current_status) > 0 && !open) open = t;
-          if (Number(c.current_status) === 0 && open) { windows.push({ start: open, end: t }); open = null; }
+          const st = Number(c.current_status);
+          if (st >= 3 && !open) open = t;
+          if (st < 3 && open) { windows.push({ start: open, end: t }); open = null; }
         }
         if (open) windows.push({ start: open, end: evEnd });
-        if (!windows.length) windows.push({ start: evStart, end: evEnd });
+        if (!changes.length && Number(info.max ?? ev.status) >= 3) windows.push({ start: evStart, end: evEnd });
         const m = /^(.*?)-((?:us|eu|ap|sa|ca|me|af|il|mx)(?:-gov)?-[a-z]+-\d)$/.exec(svcKey);
         out.push({
           vendor, source: 'aws', id: `${ev.arn || key}#${svcKey}`, name: ev.summary, impact: String(info.max ?? ev.status),
-          scheduled: false, start: windows[0].start, end: windows[windows.length - 1].end, windows,
+          scheduled: false, start: (windows[0] || { start: evStart }).start, end: (windows[windows.length - 1] || { end: evEnd }).end, windows,
+          disruption: windows.length > 0, max_status: Math.max(0, ...changes.map((c) => Number(c.current_status)), Number(info.max ?? 0)),
           service_key: m ? m[1] : svcKey, service_name: info.service_name || svcKey,
           locations: [m ? m[2] : 'global'], event_region: evRegion, url: 'https://health.aws.amazon.com/health/status', sha256,
         });
