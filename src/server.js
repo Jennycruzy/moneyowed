@@ -270,6 +270,7 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === 'GET' && p === '/evidence') return html(res, 200, evidencePage());
     if (req.method === 'GET' && p === '/purchases.json') return json(res, 200, db.allPurchases(500).map(({ answer, ...x }) => x));
+    if (req.method === 'GET' && (m = /^\/api\/cards\/([\w-]+)$/.exec(p))) { const c = listCards().find((x) => x.vendor === m[1]); return c ? json(res, 200, c) : json(res, 404, { code: 'VENDOR_NOT_COVERED', error: `no rule card for ${m[1]}` }); }
     if (req.method === 'GET' && p === '/api/vendors') return json(res, 200, listCards().map((c) => ({ vendor: c.vendor, name: c.name, plans: c.plans.map((pl) => ({ plan: pl.plan, label: pl.label, period: pl.period, per_region: Boolean(pl.per_region), services: pl.services.map((s) => s.service) })), regions: REGION_CHOICES[c.vendor] || null })));
     return html(res, 404, page('Not found', '<p>Nothing here.</p>'));
   } catch (e) {

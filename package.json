@@ -19,6 +19,7 @@
     "viem": "^2.58.4"
   },
   "bin": {
-    "moneyowed": "bin/moneyowed.js"
+    "moneyowed": "bin/moneyowed.js",
+    "moneyowed-mcp": "bin/moneyowed-mcp.js"
   }
 }
