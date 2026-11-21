@@ -5,7 +5,7 @@ import { toDate } from '../lib/time.js';
 
 const OUTAGE = new Set(['partial_outage', 'major_outage']);
 
-export async function collectStatuspage({ vendor, host }, archive, { since, log = () => {} }) {
+export async function collectStatuspage({ vendor, host }, archive, { since, log = () => {}, skip = () => false } = {}) {
   const cbuf = await fetchRaw(`https://${host}/api/v2/components.json`);
   archive.save(vendor, 'components.json', cbuf, { url: `https://${host}/api/v2/components.json` });
   const componentList = JSON.parse(cbuf).components.map((c) => ({ id: c.id, name: c.name, group: Boolean(c.group), group_id: c.group_id || null }));
@@ -25,6 +25,7 @@ export async function collectStatuspage({ vendor, host }, archive, { since, log 
   }
   const incidents = [];
   for (const code of [...new Set(codes)]) {
+    if (skip(code)) continue;
     const url = `https://${host}/incidents/${code}.json`;
     let buf;
     try { buf = await fetchRaw(url); } catch (e) { log(`${vendor}: incident ${code} fetch failed: ${e.message}`); continue; }

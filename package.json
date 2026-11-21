@@ -8,7 +8,11 @@
   },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "collect": "node scripts/collect.js"
+    "collect": "node scripts/collect.js",
+    "refresh": "node scripts/collect.js --recent && node scripts/rebuild.js && node scripts/record.js",
+    "record": "node scripts/record.js",
+    "start": "node src/server.js",
+    "bot": "node src/bot.js"
   },
   "license": "MIT",
   "dependencies": {
