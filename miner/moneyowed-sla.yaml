@@ -96,19 +96,6 @@ errors:
   message_path: error.message
   code_path: error.code
 
-intent_mapping:
-  SLA_COMPLIANCE_GENERAL:
-    endpoint: /sla-compliance
-    input:
-      service: { from: service, how: "Copy the vendor and any service, plan or region named, as written." }
-      period: { from: period, how: "Copy the period as written, e.g. last 30 days or 2026-10." }
-    output:
-      service: { path: service }
-      uptime_pct: { path: uptime_pct, unit: percent }
-      sla_target_pct: { path: sla_target_pct, unit: percent }
-      compliant: { path: compliant }
-      period: { path: period }
-
 semantics:
   signal_mapping:
     label_field: compliant
