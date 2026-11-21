@@ -8,7 +8,7 @@ export const SECOND_OPINION_MINERS = (process.env.SLA_SECOND_OPINION_MINERS || '
 export async function buySecondOpinions(tg, result, { bucket, checkId, ownMinerId = process.env.OWN_SLA_MINER_ID || null, reuse = null } = {}) {
   const s = result.services.find((x) => x.credit_pct > 0) || result.services[0];
   const v = VENDORS.find((x) => x.vendor === result.vendor);
-  const q = slaQuestion({ vendorName: v?.telegraph_service || result.vendor_name, serviceName: s.service, threshold: s.threshold_pct, periodStart: new Date(result.period_start), periodEnd: new Date(result.period_end), periodKey: result.period });
+  const q = slaQuestion({ vendorName: v?.telegraph_service || result.vendor_name, serviceName: s.service, threshold: s.threshold_pct, periodStart: new Date(result.period_start), periodEnd: new Date(result.period_end), periodKey: result.period, regions: result.regions || [] });
   const plan = [{ minerId: null, label: 'Telegraph routing (auto)' }];
   for (const m of SECOND_OPINION_MINERS) plan.push({ minerId: m, label: `direct pick ${m}` });
   if (ownMinerId) plan.push({ minerId: ownMinerId, label: 'our scoped SLA miner (disclosed: run by the same team)' });

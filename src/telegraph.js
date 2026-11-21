@@ -64,11 +64,14 @@ export class Telegraph {
 }
 
 // What we ask SLA miners, in the form today's SLA miners accept (params: service, period; target in the text).
-export function slaQuestion({ vendorName, serviceName, threshold, periodStart, periodEnd, periodKey }) {
+export function slaQuestion({ vendorName, serviceName, threshold, periodStart, periodEnd, periodKey, regions = [] }) {
+  // Name the covered service when it is a named part of the vendor (e.g. "GitHub Actions"), and the region for clouds.
+  const vendorWord = vendorName.toLowerCase().split(' ').pop();
+  const svc = regions.length ? `${serviceName} ${regions[0]}` : (serviceName.toLowerCase().startsWith(vendorWord) && serviceName.toLowerCase() !== vendorName.toLowerCase() && !/\(/.test(serviceName) ? serviceName : vendorName);
   const a = periodStart.toISOString().slice(0, 10), b = new Date(+periodEnd - 1).toISOString().slice(0, 10);
   return {
     intent: 'SLA_COMPLIANCE_GENERAL',
-    params: { service: vendorName.toLowerCase().replace(/\s*\(.*\)$/, '').replace(/\s+/g, ' '), period: `${a} to ${b}` },
+    params: { service: svc.toLowerCase().replace(/\s*\(.*\)$/, '').replace(/\s+/g, ' '), period: `${a} to ${b}` },
     query: `Did ${serviceName.toLowerCase().includes(vendorName.toLowerCase().split(' ').pop()) ? serviceName : `${vendorName} ${serviceName}`} meet a ${threshold}% uptime SLA for ${periodKey} (${a} to ${b} UTC)? Give the uptime percentage, outage minutes and the incidents counted.`,
   };
 }

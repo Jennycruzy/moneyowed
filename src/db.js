@@ -15,6 +15,7 @@ export function openDb(file = path.resolve(process.env.MONEYOWED_DATA || 'data',
     CREATE TABLE IF NOT EXISTS purchases (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT, check_id TEXT, bucket TEXT, intent TEXT, route TEXT, miner_id TEXT, miner_name TEXT, status INTEGER, paid INTEGER, cost_usd REAL, latency_ms INTEGER, answer_sha256 TEXT, data TEXT);
     CREATE TABLE IF NOT EXISTS claims (check_id TEXT PRIMARY KEY, created_at TEXT, status TEXT, sent_at TEXT, outcome_at TEXT, outcome_note TEXT, credited_usd REAL);
     CREATE INDEX IF NOT EXISTS purchases_day ON purchases (at);
+    CREATE TABLE IF NOT EXISTS miner_calls (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT, service TEXT, period TEXT, status INTEGER, code TEXT, uptime_pct REAL, from_telegraph INTEGER, ms INTEGER);
   `);
   return {
     db,
@@ -52,6 +53,8 @@ export function openDb(file = path.resolve(process.env.MONEYOWED_DATA || 'data',
       if (status === 'sent') db.prepare('UPDATE claims SET sent_at = ? WHERE check_id = ?').run(now, checkId);
       if (status === 'credited' || status === 'refused') db.prepare('UPDATE claims SET outcome_at = ?, outcome_note = ?, credited_usd = ? WHERE check_id = ?').run(now, fields.note || null, fields.credited_usd ?? null, checkId);
     },
+    minerCall(c) { db.prepare('INSERT INTO miner_calls (at, service, period, status, code, uptime_pct, from_telegraph, ms) VALUES (?,?,?,?,?,?,?,?)').run(new Date().toISOString(), String(c.service ?? '').slice(0, 200), String(c.period ?? '').slice(0, 100), c.status, c.code || null, c.uptime_pct ?? null, c.from_telegraph ? 1 : 0, c.ms); },
+    minerStats() { return db.prepare('SELECT COUNT(*) n, SUM(status = 200) ok, SUM(from_telegraph) via_telegraph, MAX(at) last FROM miner_calls').get(); },
     getClaim(checkId) { return db.prepare('SELECT * FROM claims WHERE check_id = ?').get(checkId) || null; },
   };
 }

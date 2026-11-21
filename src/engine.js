@@ -145,6 +145,44 @@ export function claimDeadline(claim, { periodEnd, breachAt, firstIncidentStart }
   return { date: null, rule: 'no deadline rule on the card' };
 }
 
+// Counted outage minutes for one covered service over [periodStart, periodEnd).
+function measureService(store, s, { groupsById, regions, mode, periodStart, periodEnd, now }) {
+  const periodMinutes = (periodEnd - periodStart) / 60000;
+  const sel = store.source === 'statuspage' ? statuspageSelector(s, groupsById, mode) : cloudSelector(store.source, s, regions, mode);
+  const rows = [];
+  const counted = [];
+  for (const inc of store.incidents) {
+    if (!inc.start) continue;
+    const incEnd = inc.end || (now < periodEnd ? now : null);
+    if (!incEnd || incEnd <= periodStart || inc.start >= periodEnd) continue;
+    const r = sel(inc);
+    const wins = (r.windows || [{ start: inc.start, end: incEnd }]).map((w) => ({ start: w.start, end: w.end || incEnd }));
+    const mins = mergeClip(wins, periodStart, periodEnd).minutes;
+    rows.push({ id: inc.id, name: inc.name, url: inc.url, start: inc.start, end: inc.end, in_scope: r.in_scope, reason: r.reason, minutes: Math.round(mins * 10) / 10, sha256: inc.sha256 || null });
+    if (r.in_scope) counted.push(...wins);
+  }
+  const merged = mergeClip(counted, periodStart, periodEnd);
+  const ev = { covered_minutes: Math.round(merged.minutes * 10) / 10, period_minutes: periodMinutes, uptime_pct: Math.floor((1 - merged.minutes / periodMinutes) * 1e6) / 1e4 };
+  return { rows, merged, ev };
+}
+
+// Uptime of one covered service over any window (used by the miner for "last N days" style questions).
+// No credit maths: credits are defined per billing period only.
+export function measureWindow({ vendor, plan: planId, service: serviceName, start, end, regions = [], mode = 'upper', now = new Date() }, { slaDir = path.resolve(process.env.MONEYOWED_DATA || 'data', 'sla') } = {}) {
+  const card = loadCard(vendor);
+  const { problems } = checkCard(card, slaDir, { withWarnings: true });
+  if (problems.length) throw new CheckError('TERMS_CHANGED', `${card.name}: rule card failed its check (${problems[0]}).`);
+  const plan = getPlan(card, planId || card.plans[0].plan);
+  const s = plan.services.find((x) => x.service === serviceName) || plan.services[0];
+  const store = readIncidents(vendor);
+  if (store.coverage_from && new Date(store.coverage_from) > start) throw new CheckError('NO_HISTORY', `${card.name} history we hold starts ${store.coverage_from.slice(0, 10)}.`);
+  if (plan.per_region && !regions.length) throw new CheckError('BAD_INPUT', `${card.name} is measured per region; name one (e.g. us-east-1).`);
+  const groupsById = new Map((store.components || []).filter((c) => c.group).map((c) => [c.id, c.name]));
+  const periodEnd = end > now ? now : end;
+  const { rows, ev } = measureService(store, s, { groupsById, regions, mode, periodStart: start, periodEnd, now });
+  return { card, plan, service: s, ...ev, incidents: rows.sort((a, b) => a.start - b.start), period_start: start, period_end: periodEnd, history: { collected_at: store.collected_at, coverage_from: store.coverage_from || null } };
+}
+
 // ---------- main entry
 // input: { vendor, plan, period, spend (number or {service: amount}), regions (clouds), mode: 'upper'|'lower', now }
 export function checkCredit(input, { slaDir = path.resolve(process.env.MONEYOWED_DATA || 'data', 'sla') } = {}) {
@@ -170,21 +208,7 @@ export function checkCredit(input, { slaDir = path.resolve(process.env.MONEYOWED
 
   const services = [];
   for (const s of plan.services) {
-    const sel = store.source === 'statuspage' ? statuspageSelector(s, groupsById, mode) : cloudSelector(store.source, s, regions, mode);
-    const rows = [];
-    const counted = [];
-    for (const inc of store.incidents) {
-      if (!inc.start) continue;
-      const incEnd = inc.end || (now < periodEnd ? now : null);
-      if (!incEnd || incEnd <= periodStart || inc.start >= periodEnd) continue;
-      const r = sel(inc);
-      const wins = (r.windows || [{ start: inc.start, end: incEnd }]).map((w) => ({ start: w.start, end: w.end || incEnd }));
-      const mins = mergeClip(wins, periodStart, periodEnd).minutes;
-      rows.push({ id: inc.id, name: inc.name, url: inc.url, start: inc.start, end: inc.end, in_scope: r.in_scope, reason: r.reason, minutes: Math.round(mins * 10) / 10, sha256: inc.sha256 || null });
-      if (r.in_scope) counted.push(...wins);
-    }
-    const merged = mergeClip(counted, periodStart, periodEnd);
-    const ev = { covered_minutes: Math.round(merged.minutes * 10) / 10, period_minutes: periodMinutes, uptime_pct: Math.floor((1 - merged.minutes / periodMinutes) * 1e6) / 1e4 };
+    const { rows, merged, ev } = measureService(store, s, { groupsById, regions, mode, periodStart, periodEnd, now });
     let pct = creditPct(s, ev);
     if (plan.cap) pct = Math.min(pct, plan.cap.pct_of_fee);
     const breachAt = pct > 0 ? breachMoment(merged.spans, periodMinutes, s.threshold_pct) : null;

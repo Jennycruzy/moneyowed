@@ -12,6 +12,7 @@ import { Telegraph } from './telegraph.js';
 import { buySecondOpinions } from './evidence.js';
 import { page, esc, money, pct, dt, dayOnly, badge } from './views.js';
 import { landingData, renderLanding } from './landing.js';
+import { answerSla, ERROR_STATUS } from './miner.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.resolve(process.env.MONEYOWED_DATA || path.join(ROOT, 'data'));
@@ -214,6 +215,28 @@ const server = http.createServer(async (req, res) => {
       const cols = ['period', 'vendor', 'plan', 'service', 'uptime_pct', 'threshold_pct', 'covered_minutes', 'credit_pct', 'deadline', 'owed'];
       res.writeHead(200, { 'content-type': 'text/csv; charset=utf-8' });
       return res.end([cols.join(','), ...r.rows.map((x) => cols.map((c) => JSON.stringify(x[c] ?? '')).join(','))].join('\n'));
+    }
+    if (p === '/miner/sla' && (req.method === 'GET' || req.method === 'POST')) {
+      const t0 = Date.now();
+      let q = Object.fromEntries(url.searchParams);
+      if (req.method === 'POST') { try { q = { ...q, ...JSON.parse((await readBody(req)) || '{}') }; } catch { q = { ...q }; } }
+      const fromTelegraph = /telegraph|anjoman|go-http-client/i.test(req.headers['user-agent'] || '');
+      try {
+        const a = answerSla(q);
+        db.minerCall({ service: q.service || q.question, period: q.period, status: 200, uptime_pct: a.uptime_pct, from_telegraph: fromTelegraph, ms: Date.now() - t0 });
+        return json(res, 200, a);
+      } catch (e) {
+        const status = ERROR_STATUS[e.code] || 500;
+        db.minerCall({ service: q.service || q.question, period: q.period, status, code: e.code || 'ERROR', from_telegraph: fromTelegraph, ms: Date.now() - t0 });
+        if (status === 500) console.error('miner', e);
+        return json(res, status, { error: { code: e.code || 'ERROR', message: status === 500 ? 'internal error' : e.message } });
+      }
+    }
+    if (req.method === 'GET' && p === '/miner.yaml') {
+      const f = path.join(ROOT, 'miner', 'moneyowed-sla.yaml');
+      if (!fs.existsSync(f)) return html(res, 404, page('Not found', '<p>Nothing here.</p>'));
+      res.writeHead(200, { 'content-type': 'text/yaml; charset=utf-8', 'access-control-allow-origin': '*' });
+      return res.end(fs.readFileSync(f));
     }
     if (req.method === 'GET' && p === '/evidence') return html(res, 200, evidencePage());
     if (req.method === 'GET' && p === '/purchases.json') return json(res, 200, db.allPurchases(500).map(({ answer, ...x }) => x));
