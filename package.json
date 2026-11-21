@@ -17,5 +17,8 @@
   "license": "MIT",
   "dependencies": {
     "viem": "^2.58.4"
+  },
+  "bin": {
+    "moneyowed": "bin/moneyowed.js"
   }
 }

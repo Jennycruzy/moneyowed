@@ -1,6 +1,7 @@
 // Web app + JSON API. Node's own http server; no framework.
 import http from 'node:http';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkCredit, CheckError, METHOD_VERSION } from './engine.js';
@@ -13,6 +14,7 @@ import { buySecondOpinions } from './evidence.js';
 import { page, esc, money, pct, dt, dayOnly, badge } from './views.js';
 import { landingData, renderLanding } from './landing.js';
 import { answerSla, ERROR_STATUS } from './miner.js';
+import { buildProof } from './proof.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.resolve(process.env.MONEYOWED_DATA || path.join(ROOT, 'data'));
@@ -114,7 +116,7 @@ ${s.incidents.map((i) => `<tr class="${i.in_scope ? 'in' : 'out'}"><td>${i.in_sc
     : ev ? `<table><tr><th>Route</th><th>Miner</th><th>Their answer</th><th>Same verdict as ours?</th><th>Notes</th><th>Cost</th><th>Time</th><th>Answer hash</th></tr>${ev.opinions.map((o) => o.skipped ? `<tr><td>${esc(o.label)}</td><td colspan="7" class="small">${esc(o.skipped)}</td></tr>` : o.error ? `<tr><td>${esc(o.label)}</td><td colspan="7">${esc(o.error)}</td></tr>` : `<tr><td>${esc(o.label)}${o.reused ? ' (reused, under 1 h old)' : ''}</td><td>${esc(o.miner_name || '')} <span class="small">${esc(o.miner_id || '')}</span></td><td>${o.uptime_pct != null ? pct(o.uptime_pct) : ''} ${o.compliant === true ? 'met' : o.compliant === false ? 'missed' : ''}<br><span class="small">${esc(o.period_label || '')}</span></td><td>${o.agrees === true ? 'yes' : o.agrees === false ? '<b>no</b>' : '?'}</td><td class="small">${esc((o.notes || []).join('; '))}</td><td>${money(o.cost_usd)}</td><td>${(o.latency_ms / 1000).toFixed(1)} s</td><td class="mono">${esc((o.answer_sha256 || '').slice(0, 12))}</td></tr>`).join('')}</table>
 <p class="small">Question sent: <code>${esc(JSON.stringify(ev.question))}</code>. Payments: Telegraph escrow on testnet (Ethereum Sepolia, test USDC). Our verdict is computed from the vendor's own incident records and SLA text; bought answers are shown for comparison.</p>`
     : job ? `<p>${esc(job)}</p>` : '<p class="small">No Telegraph purchase for this check.</p>';
-  return page(`${r.vendor_name} ${r.period}`, `<section class="verdict">${head}<p class="small">${esc(r.plan_label)} · ${esc(r.period)} (${dayOnly(r.period_start)} to ${dayOnly(new Date(+new Date(r.period_end) - 1))})${r.regions.length ? ` · regions ${esc(r.regions.join(', '))}` : ''} · count: ${r.mode === 'lower' ? 'major outages only' : 'all outages'} · <a href="/check/${id}.json">JSON</a></p>
+  return page(`${r.vendor_name} ${r.period}`, `<section class="verdict">${head}<p class="small">${esc(r.plan_label)} · ${esc(r.period)} (${dayOnly(r.period_start)} to ${dayOnly(new Date(+new Date(r.period_end) - 1))})${r.regions.length ? ` · regions ${esc(r.regions.join(', '))}` : ''} · count: ${r.mode === 'lower' ? 'major outages only' : 'all outages'} · <a href="/check/${id}.json">JSON</a> · <a href="/check/${id}/proof.json">Proof file</a> (recompute offline: <span class="mono">node bin/moneyowed.js verify moneyowed-proof-${id}.json</span>)</p>
 ${r.spend_note ? `<p class="small">${esc(r.spend_note)}</p>` : ''}${(r.card.page_changed || []).length ? `<p class="warn">The SLA page changed since its card was checked; every quoted term is still on it word for word. Card under review.</p>` : ''}
 ${['OWED', 'PERIOD_OPEN'].includes(r.code) && owed.length ? `<p><a class="button" href="/claim/${id}">Open the claim draft</a></p>` : ''}</section>
 ${svc}
@@ -157,7 +159,27 @@ function evidencePage() {
   return page('Evidence', `<section><h1>How it is checked</h1>
 <ul><li>Incident history: each vendor's public status history, archived as fetched with its sha256.</li><li>Rules: one card per vendor, written from the vendor's SLA text; every threshold, tier, cap and claim deadline is backed by a word-for-word quote, re-checked automatically against the text.</li><li>Decision: plain code. A language model never sets a number.</li><li>Telegraph: every check buys SLA answers from miners and shows them beside ours, with cost, time and answer hash.</li></ul></section>
 <section><h2>Telegraph purchases on this server</h2><p>${paid.length} paid answers, ${money(paid.reduce((t, p) => t + p.cost_usd, 0))} total, median ${median(paid.map((p) => p.latency_ms / 1000)).toFixed(1)} s. <a href="/purchases.json">JSON</a></p></section>
+${minerSection()}
 <section id="not-covered"><h2>Vendors not covered, and why</h2><ul>${NOT_COVERED.map((n) => `<li><b>${esc(n.name)}</b>: ${esc(n.reason)}</li>`).join('')}</ul></section>`);
+}
+function minerSection() {
+  const read = (f) => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'miner', f), 'utf8')); } catch { return null; } };
+  const reg = read('registration.json');
+  if (!reg) return '';
+  const acc = read('accuracy.json');
+  const yamlFile = path.join(ROOT, 'miner', 'moneyowed-sla.yaml');
+  const yamlHash = fs.existsSync(yamlFile) ? crypto.createHash('sha256').update(fs.readFileSync(yamlFile)).digest('hex') : '';
+  const st = db.minerStats();
+  const tx = (h) => `<a class="mono" href="https://sepolia.etherscan.io/tx/${esc(h)}">${esc(h.slice(0, 10))}…</a>`;
+  return `<section id="miner"><h2>Our SLA miner on Telegraph</h2>
+<p>The same engine answers <b>${esc(reg.intent)}</b> for any Telegraph buyer, as miner <b>${esc(reg.miner_id)}</b> (<span class="mono">${esc(reg.slug)}</span>). It is run by the MONEY OWED team. When a check here buys its answer, the page labels it as ours, and it never counts as an outside opinion.</p>
+<ul><li>Registration ${esc(reg.registration_id)} on ${esc(reg.chain)}: ${tx(reg.register_tx)}, updated ${tx(reg.update_tx)}</li>
+<li>Miner file: <a href="/miner.yaml">miner.yaml</a>, sha256 <span class="mono">${esc(yamlHash.slice(0, 16))}…</span>, the same hash that is stored on chain</li>
+<li>Try it without Telegraph: <a class="mono" href="/miner/sla?service=GitHub&amp;period=2026-Q3">/miner/sla?service=GitHub&amp;period=2026-Q3</a></li>
+<li>Calls served by this server: ${st.n || 0} (${st.ok || 0} answered)${st.last ? `, last ${esc(dt(st.last))} UTC` : ''}</li></ul>
+${acc ? `<h3>Every SLA miner against hand-checked truth</h3><p>${esc(acc.items)} vendor-months whose correct answer was worked out by hand before any miner was asked. Each miner got the same question, paid through Telegraph. Rules fixed in advance (sha256 <span class="mono">${esc(acc.protocol_sha256.slice(0, 12))}…</span>). Our miner uses the same counting rules as the person who did the hand check, so its row is not an independent test.</p>
+<table><tr><th>Miner</th><th>Answered</th><th>Verdict right</th><th>Uptime within 0.01 pt</th><th>Breaches caught</th><th>Answered a different window</th></tr>${acc.table.map((r) => `<tr><td>${esc(r.name)} <span class="small">${esc(r.miner)}${r.own ? ' · ours' : ''}</span></td><td>${r.answered}/${r.asked}</td><td>${r.verdict_right}/${r.asked}</td><td>${r.uptime_close}/${r.asked}</td><td>${r.owed_caught}/${r.owed_total}</td><td>${r.wrong_window}</td></tr>`).join('')}</table>` : ''}
+</section>`;
 }
 const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
 
@@ -199,6 +221,14 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(303, { location: `/check/${id}` }); return res.end();
     }
     let m;
+    if (req.method === 'GET' && (m = /^\/check\/([\w-]+)\/proof\.json$/.exec(p))) {
+      const r = db.getCheck(m[1]);
+      if (!r) return json(res, 404, { error: 'not found' });
+      const fees = Object.fromEntries(r.result.services.filter((x) => x.fee != null).map((x) => [x.service, x.fee]));
+      const proof = buildProof({ spend: Object.keys(fees).length ? fees : null }, r.result);
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'content-disposition': `attachment; filename="moneyowed-proof-${m[1]}.json"` });
+      return res.end(JSON.stringify(proof));
+    }
     if (req.method === 'GET' && (m = /^\/check\/([\w-]+)\.json$/.exec(p))) { const r = db.getCheck(m[1]); return r ? json(res, 200, { id: m[1], ...r.result, purchases: db.purchasesFor(m[1]) }) : json(res, 404, { error: 'not found' }); }
     if (req.method === 'GET' && (m = /^\/check\/([\w-]+)$/.exec(p))) { const b = checkPage(m[1]); return b ? html(res, 200, b) : html(res, 404, page('Not found', '<p>No such check.</p>')); }
     if (req.method === 'GET' && (m = /^\/claim\/([\w-]+)$/.exec(p))) { const b = claimPage(m[1]); return b ? html(res, 200, b) : html(res, 404, page('Not found', '<p>No such check.</p>')); }

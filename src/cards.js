@@ -6,15 +6,16 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const CARD_DIR = path.join(ROOT, 'cards');
+const cardDir = () => process.env.MONEYOWED_CARDS || CARD_DIR;
 
 export function loadCard(vendor) {
-  const f = path.join(CARD_DIR, `${vendor}.json`);
+  const f = path.join(cardDir(), `${vendor}.json`);
   if (!fs.existsSync(f)) throw Object.assign(new Error(`no rule card for ${vendor}`), { code: 'VENDOR_NOT_COVERED' });
   return JSON.parse(fs.readFileSync(f, 'utf8'));
 }
 
 export function listCards() {
-  return fs.readdirSync(CARD_DIR).filter((f) => f.endsWith('.json') && !f.startsWith('_')).map((f) => loadCard(f.replace(/\.json$/, '')));
+  return fs.readdirSync(cardDir()).filter((f) => f.endsWith('.json') && !f.startsWith('_')).map((f) => loadCard(f.replace(/\.json$/, '')));
 }
 
 export function getPlan(card, planId) {

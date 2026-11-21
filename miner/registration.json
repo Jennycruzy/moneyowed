@@ -1,0 +1,12 @@
+{
+ "intent": "SLA_COMPLIANCE_GENERAL",
+ "miner_id": "2611217",
+ "slug": "moneyowed-sla",
+ "registration_id": "6155",
+ "chain": "Ethereum Sepolia",
+ "diamond": "0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b",
+ "registered_by": "0x2d87B538e3beD8C9c44Df502B3a816D76da09A31",
+ "register_tx": "0xce689f9f5ba6bac3d13717016b26045ad2425ee15e52dafa7d75bb4f72208d20",
+ "update_tx": "0x0847079c29de9bf5477c4b3b73262f58f19716901b65f864eea4c3c2e7ca3a60",
+ "yaml_url": "https://moneyowed.38-49-216-59.sslip.io/miner.yaml"
+}
