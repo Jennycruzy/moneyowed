@@ -8,9 +8,10 @@ import { checkCredit, CheckError, METHOD_VERSION } from './engine.js';
 import { listCards } from './cards.js';
 import { VENDORS, NOT_COVERED } from './vendors.js';
 import { draftClaim } from './claim.js';
+import { answerObligations, obligationsView } from './obligations.js';
 import { openDb } from './db.js';
 import { Telegraph } from './telegraph.js';
-import { buySecondOpinions } from './evidence.js';
+import { buySecondOpinions, buyContractTerms } from './evidence.js';
 import { page, esc, money, pct, dt, dayOnly, badge } from './views.js';
 import { landingData, renderLanding } from './landing.js';
 import { makePages } from './pages.js';
@@ -71,6 +72,10 @@ async function startEvidence(id, result, bucket) {
   try {
     const ev = await buySecondOpinions(tg, result, { bucket, checkId: id, reuse: (q, m) => db.recentAnswer(q, m) });
     db.db.prepare("UPDATE checks SET result = json_set(result, '$.evidence', json(?)) WHERE id = ?").run(JSON.stringify(ev), id);
+    if (result.claim?.quote) {
+      const terms = await buyContractTerms(tg, result, { bucket, checkId: id, reuse: (q, m) => db.recentAnswer(q, m) });
+      db.db.prepare("UPDATE checks SET result = json_set(result, '$.contract_terms', json(?)) WHERE id = ?").run(JSON.stringify(terms), id);
+    }
     jobs.set(id, 'done');
   } catch (e) { jobs.set(id, `Telegraph purchase failed: ${e.message}`); }
 }
@@ -178,6 +183,23 @@ const server = http.createServer(async (req, res) => {
       } catch (e) {
         console.error('miner', kind, e);
         db.minerCall({ service: q.url || q.question, period: kind, status: 500, code: 'ERROR', from_telegraph: fromTelegraph, ms: Date.now() - t0 });
+        return json(res, 500, { error: { code: 'ERROR', message: 'internal error' } });
+      }
+    }
+    if ((p === '/miner/contract' || p === '/contract-obligations') && (req.method === 'GET' || req.method === 'POST')) {
+      const t0 = Date.now();
+      let q = Object.fromEntries(url.searchParams);
+      if (req.method === 'POST') { const b = await readBody(req); try { q = { ...q, ...JSON.parse(b || '{}') }; } catch { q = { ...q, contract: b }; } }
+      const fromTelegraph = /telegraph|anjoman|go-http-client/i.test(req.headers['user-agent'] || '');
+      try {
+        const a = await answerObligations(q);
+        db.minerCall({ service: String(q.contract || q.question || '').slice(0, 80), period: 'contract', status: 200, code: a.status === 'not_audited' ? 'NOT_AUDITED' : null, from_telegraph: fromTelegraph, ms: Date.now() - t0 });
+        const short = String(q.view || '').toLowerCase() === 'short';
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' });
+        return res.end(JSON.stringify(short ? obligationsView(a) : a, null, 2));
+      } catch (e) {
+        console.error('miner contract', e);
+        db.minerCall({ service: 'contract', period: 'contract', status: 500, code: 'ERROR', from_telegraph: fromTelegraph, ms: Date.now() - t0 });
         return json(res, 500, { error: { code: 'ERROR', message: 'internal error' } });
       }
     }

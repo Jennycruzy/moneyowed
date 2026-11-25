@@ -10,7 +10,7 @@ const DIAMOND = '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b';
 const USDC = '0xcc194e1a843B658526D0D5C431f670028582Ae17';
 const RPC = process.env.SEPOLIA_RPC || 'https://ethereum-sepolia-rpc.publicnode.com';
 const YAML_URL = process.env.MINER_YAML_URL || 'https://moneyowed.38-49-216-59.sslip.io/miner.yaml';
-const INTENTS = ['SLA_COMPLIANCE_GENERAL', 'SERVER_UPTIME_MONITOR_GENERAL', 'API_HEALTH_CHECK_GENERAL'];
+const INTENTS = ['SLA_COMPLIANCE_GENERAL', 'SERVER_UPTIME_MONITOR_GENERAL', 'API_HEALTH_CHECK_GENERAL', 'CONTRACT_OBLIGATION_AUDIT_GENERAL'];
 const MIN_PRICE = 10000n;
 
 const account = privateKeyToAccount(process.env.TELEGRAPH_PRIVATE_KEY);

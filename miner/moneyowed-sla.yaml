@@ -13,7 +13,8 @@ description: >-
   SLA. Calendar months and quarters match the billing period the SLA uses and also return the service credit
   owed and the claim deadline. Every answer lists each incident with whether it counted and why.
   Also answers live uptime and API health checks for any public HTTP or HTTPS address, adding the vendor's
-  own open incidents and 30-day uptime when the address belongs to a tracked vendor.
+  own open incidents and 30-day uptime when the address belongs to a tracked vendor. Also audits contract
+  obligations (who owes what by when, with the clause quoted) for any contract or terms text.
 base_url: https://moneyowed.38-49-216-59.sslip.io
 
 rate_limit_per_sec: 5
@@ -93,6 +94,24 @@ endpoints:
             type: string
             intents: ["*"]
             description: The endpoint address copied from the question, for example "https://api.example.com/v1/status".
+  - path: /contract-obligations
+    external_path: /miner/contract
+    method: GET
+    description: >-
+      Audits a contract or terms text: who owes what, by when, under which condition. Each obligation,
+      prohibition and right is one sentence of the text, with the clause quoted, so every line can be checked
+      against the contract. The verdict is Compliant, Partially compliant or Non-compliant only when the text
+      also states what happened (for example a payment made 45 days after a 30-day deadline); otherwise it is
+      Unclear and says why. Accepts the text itself or a public link to it. POST with a JSON body is also
+      accepted for long texts.
+    intents: [CONTRACT_OBLIGATION_AUDIT_GENERAL]
+    params:
+      query:
+        required:
+          - name: contract
+            type: string
+            intents: ["*"]
+            description: The contract text, or a public link to it, copied from the question.
 
 input_schema:
   type: object
