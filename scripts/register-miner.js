@@ -1,5 +1,5 @@
 // Register (or dry-run) the SLA miner on the Telegraph Diamond.
-// Usage: node scripts/register-miner.js [--send] [--update <registrationId>]   (update = new YAML/hash for an existing registration)
+// Usage: node scripts/register-miner.js [--approve] [--send] [--update <registrationId>]   (update = new YAML/hash for an existing registration)
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { createPublicClient, createWalletClient, http, parseAbi, decodeEventLog } from 'viem';
@@ -10,7 +10,7 @@ const DIAMOND = '0x72a70e949362670Bf8bceAd24eFC5b8f950aa08b';
 const USDC = '0xcc194e1a843B658526D0D5C431f670028582Ae17';
 const RPC = process.env.SEPOLIA_RPC || 'https://ethereum-sepolia-rpc.publicnode.com';
 const YAML_URL = process.env.MINER_YAML_URL || 'https://moneyowed.38-49-216-59.sslip.io/miner.yaml';
-const INTENTS = ['SLA_COMPLIANCE_GENERAL'];
+const INTENTS = ['SLA_COMPLIANCE_GENERAL', 'SERVER_UPTIME_MONITOR_GENERAL', 'API_HEALTH_CHECK_GENERAL'];
 const MIN_PRICE = 10000n;
 
 const account = privateKeyToAccount(process.env.TELEGRAPH_PRIVATE_KEY);
@@ -39,8 +39,9 @@ const oldId = ui > 0 ? BigInt(process.argv[ui + 1]) : null;
 const fn = oldId != null ? 'updateMiner' : 'registerMiner';
 const args = oldId != null ? [oldId, YAML_URL, hash, account.address, MIN_PRICE, INTENTS] : [YAML_URL, hash, account.address, MIN_PRICE, INTENTS];
 
-if (send && oldId == null) {
-  if (bal < 2_000_000n) { const tx = await wallet.writeContract({ address: USDC, abi: erc20, functionName: 'mint', args: [account.address, 5_000_000n] }); await pub.waitForTransactionReceipt({ hash: tx }); console.log('minted 5 test USDC', tx); }
+// --approve sets the 2 test USDC bond allowance (an update re-posts the bond too), then dry-runs.
+if ((send && oldId == null) || process.argv.includes('--approve')) {
+  if (oldId == null && bal < 2_000_000n) { const tx = await wallet.writeContract({ address: USDC, abi: erc20, functionName: 'mint', args: [account.address, 5_000_000n] }); await pub.waitForTransactionReceipt({ hash: tx }); console.log('minted 5 test USDC', tx); }
   const tx = await wallet.writeContract({ address: USDC, abi: erc20, functionName: 'approve', args: [DIAMOND, 2_000_000n] });
   await pub.waitForTransactionReceipt({ hash: tx }); console.log('approved 2 test USDC for the bond', tx);
 }

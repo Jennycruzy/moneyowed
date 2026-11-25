@@ -12,6 +12,8 @@ description: >-
   performance and scheduled maintenance excluded), and compared with the target in the vendor's published
   SLA. Calendar months and quarters match the billing period the SLA uses and also return the service credit
   owed and the claim deadline. Every answer lists each incident with whether it counted and why.
+  Also answers live uptime and API health checks for any public HTTP or HTTPS address, adding the vendor's
+  own open incidents and 30-day uptime when the address belongs to a tracked vendor.
 base_url: https://moneyowed.38-49-216-59.sslip.io
 
 rate_limit_per_sec: 5
@@ -56,6 +58,41 @@ endpoints:
             type: string
             intents: ["*"]
             description: Plan name when the vendor has several SLAs, for example "premium" or "enterprise". Defaults to the first plan with an SLA.
+
+  - path: /server-uptime
+    external_path: /miner/uptime
+    method: GET
+    description: >-
+      Live availability check of one HTTP or HTTPS address. Sends a GET with redirects followed (each hop
+      checked), retries once on a network error, and returns is_up, status_code, latency_ms and a verdict.
+      When the address belongs to a tracked vendor (GitHub, Atlassian, Vercel, DigitalOcean, Twilio and others)
+      it adds the open incidents from that vendor's own status page and its last-30-days uptime from the
+      vendor's incident history. Private and internal addresses are refused, never probed.
+    intents: [SERVER_UPTIME_MONITOR_GENERAL]
+    params:
+      query:
+        required:
+          - name: url
+            type: string
+            intents: ["*"]
+            description: >-
+              The address to check, copied from the question, for example "https://api.github.com" or
+              "example.com/health". A bare host name is checked over https.
+  - path: /api-health
+    external_path: /miner/api-health
+    method: GET
+    description: >-
+      Live health check of one REST or GraphQL endpoint: HTTP status, latency, content type and whether a JSON
+      body parses, with the top-level keys. Adds the vendor's open status-page incidents for tracked vendors.
+      Private and internal addresses are refused, never probed.
+    intents: [API_HEALTH_CHECK_GENERAL]
+    params:
+      query:
+        required:
+          - name: url
+            type: string
+            intents: ["*"]
+            description: The endpoint address copied from the question, for example "https://api.example.com/v1/status".
 
 input_schema:
   type: object
@@ -102,3 +139,5 @@ semantics:
     reason_field: answer
   supported_intents:
     - SLA_COMPLIANCE_GENERAL
+    - SERVER_UPTIME_MONITOR_GENERAL
+    - API_HEALTH_CHECK_GENERAL

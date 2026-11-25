@@ -16,6 +16,7 @@ import { landingData, renderLanding } from './landing.js';
 import { makePages } from './pages.js';
 import { answerSla, abstainSla, shortView, ERROR_STATUS } from './miner.js';
 import { buildProof } from './proof.js';
+import { answerUptime, answerApiHealth, uptimeView } from './probe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.resolve(process.env.MONEYOWED_DATA || path.join(ROOT, 'data'));
@@ -160,6 +161,24 @@ const server = http.createServer(async (req, res) => {
         db.minerCall({ service: q.service || q.question, period: q.period, status, code: e.code || 'ERROR', from_telegraph: fromTelegraph, ms: Date.now() - t0 });
         if (status === 500) { console.error('miner', e); return json(res, 500, { error: { code: 'ERROR', message: 'internal error' } }); }
         return send(abstainSla(q, e));
+      }
+    }
+    if ((p === '/miner/uptime' || p === '/miner/api-health' || p === '/server-uptime' || p === '/api-health') && (req.method === 'GET' || req.method === 'POST')) {
+      const t0 = Date.now();
+      let q = Object.fromEntries(url.searchParams);
+      if (req.method === 'POST') { try { q = { ...q, ...JSON.parse((await readBody(req)) || '{}') }; } catch { q = { ...q }; } }
+      const fromTelegraph = /telegraph|anjoman|go-http-client/i.test(req.headers['user-agent'] || '');
+      const kind = /uptime/.test(p) ? 'uptime' : 'api-health';
+      try {
+        const a = kind === 'uptime' ? await answerUptime(q) : await answerApiHealth(q);
+        db.minerCall({ service: a.url || q.url || q.question, period: kind, status: 200, code: a.status === 'not_checked' ? 'NOT_CHECKED' : null, from_telegraph: fromTelegraph, ms: Date.now() - t0 });
+        const full = String(q.detail || '').toLowerCase() === 'full';
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' });
+        return res.end(JSON.stringify(kind === 'uptime' && !full ? uptimeView(a) : a, null, 2));
+      } catch (e) {
+        console.error('miner', kind, e);
+        db.minerCall({ service: q.url || q.question, period: kind, status: 500, code: 'ERROR', from_telegraph: fromTelegraph, ms: Date.now() - t0 });
+        return json(res, 500, { error: { code: 'ERROR', message: 'internal error' } });
       }
     }
     if (req.method === 'GET' && p === '/sample-invoice') return html(res, 200, pages.sampleInvoice());
