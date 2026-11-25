@@ -14,7 +14,7 @@ import { buySecondOpinions } from './evidence.js';
 import { page, esc, money, pct, dt, dayOnly, badge } from './views.js';
 import { landingData, renderLanding } from './landing.js';
 import { makePages } from './pages.js';
-import { answerSla, abstainSla, ERROR_STATUS } from './miner.js';
+import { answerSla, abstainSla, shortView, ERROR_STATUS } from './miner.js';
 import { buildProof } from './proof.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -149,15 +149,17 @@ const server = http.createServer(async (req, res) => {
       let q = Object.fromEntries(url.searchParams);
       if (req.method === 'POST') { try { q = { ...q, ...JSON.parse((await readBody(req)) || '{}') }; } catch { q = { ...q }; } }
       const fromTelegraph = /telegraph|anjoman|go-http-client/i.test(req.headers['user-agent'] || '');
+      const full = String(q.detail || '').toLowerCase() === 'full';
+      const send = (body) => { res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' }); res.end(JSON.stringify(full ? body : shortView(body), null, full ? 1 : 2)); };
       try {
         const a = answerSla(q);
         db.minerCall({ service: q.service || q.question, period: q.period, status: 200, uptime_pct: a.uptime_pct, from_telegraph: fromTelegraph, ms: Date.now() - t0 });
-        return json(res, 200, a);
+        return send(a);
       } catch (e) {
         const status = ERROR_STATUS[e.code] || 500;
         db.minerCall({ service: q.service || q.question, period: q.period, status, code: e.code || 'ERROR', from_telegraph: fromTelegraph, ms: Date.now() - t0 });
         if (status === 500) { console.error('miner', e); return json(res, 500, { error: { code: 'ERROR', message: 'internal error' } }); }
-        return json(res, 200, abstainSla(q, e));
+        return send(abstainSla(q, e));
       }
     }
     if (req.method === 'GET' && p === '/sample-invoice') return html(res, 200, pages.sampleInvoice());

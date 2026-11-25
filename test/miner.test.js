@@ -97,3 +97,26 @@ test('questions the miner cannot measure get a full answer with no invented numb
     assert.equal(a.abstained, true); assert.match(a.answer, /^Not measured/); assert.match(a.answer, /GitHub/);
   }
 });
+
+test('the short view puts the verdict first and keeps the measured numbers', async () => {
+  const { answerSla, shortView } = await import('../src/miner.js');
+  const full = answerSla({ service: 'GitHub', period: '2026-Q3' }, { now: NOW });
+  const s = shortView(full);
+  assert.deepEqual(Object.keys(s).slice(0, 7), ['summary', 'sla', 'service', 'period', 'uptime_pct', 'sla_target_pct', 'compliant']);
+  assert.equal(s.uptime_pct, full.uptime_pct); assert.equal(s.compliant, full.compliant);
+  assert.equal(s.sla.breached, !full.compliant);
+  assert.match(s.summary, new RegExp(full.compliant ? 'SLA MET' : 'SLA BREACHED'));
+  assert.equal(s.status, 'assessed'); assert.equal(s.incidents, undefined);
+});
+
+test('the short view of an unmeasurable question states it was not assessed and guesses nothing', async () => {
+  const { answerSla, abstainSla, shortView } = await import('../src/miner.js');
+  const now = new Date('2026-11-25T00:30:00Z');
+  for (const q of [{ service: 'Alpha', period: '2024-Q1' }, { service: 'github', period: '2027-03' }]) {
+    let err; try { answerSla(q, { now }); } catch (e) { err = e; }
+    const s = shortView(abstainSla(q, err, { now }));
+    assert.equal(s.uptime_pct, null); assert.equal(s.sla_target_pct, null); assert.equal(s.compliant, null);
+    assert.equal(s.sla.breached, null); assert.equal(s.status, 'not_assessed');
+    assert.match(s.summary, /SLA NOT ASSESSED/); assert.doesNotMatch(JSON.stringify(s), /Covered:/);
+  }
+});

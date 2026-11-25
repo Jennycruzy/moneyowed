@@ -207,4 +207,38 @@ export function abstainSla(q, err, { now = new Date() } = {}) {
   };
 }
 
-export const ERROR_STATUS = { BAD_INPUT: 400, VENDOR_NOT_COVERED: 404, PLAN_NOT_COVERED: 404, NO_HISTORY: 422, TERMS_CHANGED: 409 };
+// The short view Telegraph receives by default: verdict first, the five standard fields, the counted
+// minutes and credit, and where the figure comes from. The full incident list stays at ?detail=full.
+const DATA_SOURCE = "the vendor's own public status page incident history";
+const METHOD_TEXT = "vendor-marked outage minutes on covered services, compared with the vendor's published SLA target";
+
+export function shortView(a) {
+  const head = { service: a.service, period: a.period, uptime_pct: a.uptime_pct, sla_target_pct: a.sla_target_pct, compliant: a.compliant };
+  if (a.abstained) {
+    const why = a.reason_code === 'VENDOR_NOT_COVERED'
+      ? 'no tracked public incident history for this service'
+      : String(a.reason || 'the request could not be measured').split(/\.\s/)[0].replace(/\.$/, '');
+    const Why = why[0].toUpperCase() + why.slice(1);
+    return {
+      summary: `${a.service || 'The service'}: SLA NOT ASSESSED for ${a.period || 'the period'}. ${Why}, so no uptime figure is reported.`,
+      sla: { breached: null, reasons: [why], summary: `SLA NOT ASSESSED: ${why}` },
+      ...head,
+      answer: `Not measured: ${why}, so no uptime figure is given for ${a.service || 'the service'} over ${a.period || 'the period'}. No number is guessed.`,
+      status: 'not_assessed', data_source: null,
+      how_to_assess: "Give the provider's public status page URL or its published SLA target to get a measured verdict.",
+    };
+  }
+  const verdict = `${a.compliant ? 'SLA MET' : 'SLA BREACHED'}: ${a.uptime_pct}% uptime against a ${a.sla_target_pct}% target`;
+  const reasons = a.compliant ? [] : [`uptime ${a.uptime_pct}% is below the ${a.sla_target_pct}% target (${a.downtime_minutes} min counted outage, ${a.allowed_downtime_minutes} min allowed)`];
+  const extra = {};
+  for (const k of ['downtime_minutes', 'allowed_downtime_minutes', 'incidents_counted', 'credit_pct', 'claim_deadline']) if (a[k] != null) extra[k] = a[k];
+  return {
+    summary: `${a.service} over ${a.period}: ${verdict}.`,
+    sla: { breached: !a.compliant, target_pct: a.sla_target_pct, reasons, summary: verdict },
+    ...head, ...extra,
+    answer: a.answer,
+    status: 'assessed', data_source: DATA_SOURCE, method: METHOD_TEXT,
+  };
+}
+
+export const ERROR_STATUS ={ BAD_INPUT: 400, VENDOR_NOT_COVERED: 404, PLAN_NOT_COVERED: 404, NO_HISTORY: 422, TERMS_CHANGED: 409 };

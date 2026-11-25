@@ -36,7 +36,7 @@ export function compare(purchase, result, service, question, { own = false } = {
   if (a.uptime_pct === null && a.compliant === null) return { ...base, agrees: null, period_label: a.period_label, notes: ['paid, but the answer carried no uptime figure and no verdict'], raw: purchase.answer };
   const notes = [];
   if (a.period_label && !String(a.period_label).includes(question.params.period.slice(0, 7)) && /last|rolling|90|30 days/i.test(String(a.period_label))) notes.push(`answered for "${a.period_label}", not the period asked`);
-  if (own) notes.push('ours, same counting rules as this page; Telegraph passes on the five standard fields, the full incident list is at /miner/sla');
+  if (own) notes.push('ours, same counting rules as this page; Telegraph passes on the five standard fields, the full incident list is at /miner/sla?detail=full');
   else if (!a.incidents_listed) notes.push('no incident list, so the SLA scope cannot be applied to it');
   const ourCompliant = service.uptime_pct >= service.threshold_pct;
   let agrees = null;

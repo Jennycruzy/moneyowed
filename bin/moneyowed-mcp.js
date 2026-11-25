@@ -24,7 +24,7 @@ const TOOLS = [
     run: async ({ check_id, customer, account }) => draftClaim(await get(`/check/${encodeURIComponent(check_id)}.json`), { customer, account }) },
   { name: 'sla_compliance', description: 'Uptime of a vendor service over any past window ("last 30 days", "2026-10", "2026-Q3") against its SLA target, counting only vendor-marked outages on covered services.',
     inputSchema: { type: 'object', required: ['service', 'period'], properties: { service: str('Vendor and optional service/region, e.g. "GitHub Actions", "Amazon EC2 us-east-1"'), period: str('Past period') } },
-    run: async ({ service, period }) => get(`/miner/sla?service=${encodeURIComponent(service)}&period=${encodeURIComponent(period)}`) },
+    run: async ({ service, period }) => get(`/miner/sla?service=${encodeURIComponent(service)}&period=${encodeURIComponent(period)}&detail=full`) },
   { name: 'list_vendors', description: 'Covered vendors, their plans with an SLA, and the billing period each uses.',
     inputSchema: { type: 'object', properties: {} }, run: async () => get('/api/vendors') },
 ];
