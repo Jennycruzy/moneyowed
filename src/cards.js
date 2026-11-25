@@ -85,3 +85,28 @@ export function checkCard(card, slaDir, { withWarnings = false } = {}) {
   }
   return withWarnings ? { problems, warnings } : problems;
 }
+
+// After an SLA page changes: if every quoted term on a card is still in the new text word for word, pin the card to the
+// new text (keeping the old hash and the date), so proofs made from the new text verify. If any quote is gone, leave the
+// card alone: its checks stop with TERMS_CHANGED until someone re-reads the contract.
+export function repinCards(slaDir, { dir = cardDir(), today = new Date().toISOString().slice(0, 10) } = {}) {
+  const done = [];
+  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.json') && !x.startsWith('_'))) {
+    const file = path.join(dir, f);
+    const card = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (!Array.isArray(card.sla_texts)) continue;
+    const { problems, warnings } = checkCard(card, slaDir, { withWarnings: true });
+    if (!warnings.length) continue;
+    if (problems.length) { done.push({ vendor: card.vendor, repinned: false, why: problems[0] }); continue; }
+    for (const t of card.sla_texts) {
+      const now = crypto.createHash('sha256').update(fs.readFileSync(path.join(slaDir, t.file))).digest('hex');
+      if (now === t.sha256) continue;
+      t.history = [...(t.history || []), { sha256: t.sha256, replaced: today }];
+      t.sha256 = now;
+      t.quotes_rechecked = today;
+    }
+    fs.writeFileSync(file, JSON.stringify(card, null, 2) + '\n');
+    done.push({ vendor: card.vendor, repinned: true });
+  }
+  return done;
+}

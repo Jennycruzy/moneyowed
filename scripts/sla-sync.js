@@ -1,14 +1,16 @@
 // SLA texts. Two modes:
 //   node scripts/sla-sync.js --from-raw   rebuild data/sla/*.txt from the saved raw pages (data/sla/raw)
 //   node scripts/sla-sync.js --check      fetch every page now; if its text differs, the new text replaces the old one
-//                                         (old kept in data/sla/history/) so that card's checks stop with TERMS_CHANGED
-//                                         until the card is re-checked by hand.
+//                                         (old kept in data/sla/history/). A card whose quotes are all still in the new
+//                                         text is pinned to it; a card with a missing quote stops with TERMS_CHANGED
+//                                         until it is re-checked by hand.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { toText } from '../src/slatext.js';
 import { fetchRaw } from '../src/archive.js';
+import { repinCards } from '../src/cards.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.resolve(process.env.MONEYOWED_DATA || path.join(ROOT, 'data'), 'sla');
@@ -55,4 +57,6 @@ for (const [file, src] of Object.entries(sources)) {
   } catch (e) { failed++; console.log(`FAILED   ${file}: ${e.message}`); }
 }
 console.log(`${changed} changed, ${failed} failed`);
+// pin cards whose quotes all survived the change; the others stay stopped
+for (const r of repinCards(DATA)) console.log(r.repinned ? `repinned ${r.vendor}: every quoted term is still in the new text` : `STOPPED  ${r.vendor}: ${r.why}`);
 process.exitCode = failed ? 1 : 0;
