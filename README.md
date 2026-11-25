@@ -28,6 +28,31 @@ Public write-up with the GitHub and Jira numbers: [post on X](https://x.com/jenn
    It re-reads the vendor's own incident records inside the proof, checks each one against its archived sha256, re-runs the decision, and prints `VERIFIED` only if the verdict, uptime, minutes, credit and deadline all match.
 4. Install the browser extension ([download](https://moneyowed.38-49-216-59.sslip.io/extension.zip), unzip, load unpacked in `chrome://extensions`), open the [sample invoice](https://moneyowed.38-49-216-59.sslip.io/sample-invoice) or a real vendor invoice in Gmail, and click the icon: "This invoice is $2,000. You are owed $200 (10%) for 2026-10. Claim before paying."
 
+## In your own repo, every month
+
+Add one workflow file and MONEY OWED checks your vendors after each month closes. When a credit is owed and the claim window is still open, it opens an issue with the amount, the deadline and the claim text ready to send. No key and no install.
+
+```yaml
+# .github/workflows/sla-credits.yml
+name: SLA credits
+on:
+  schedule: [{ cron: '0 9 2 * *' }]
+  workflow_dispatch:
+permissions:
+  issues: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Jennycruzy/moneyowed@build
+        with:
+          vendors: |
+            jira:premium=1200
+            github=2100
+```
+
+One vendor per line as `vendor[:plan][=monthly bill in USD]`; `node bin/moneyowed.js vendors` lists them. The run summary shows every vendor; each check also buys Telegraph SLA answers and links them on its page. A live example runs in this repo: [SLA credits workflow](https://github.com/Jennycruzy/moneyowed/actions/workflows/sla-credits.yml).
+
 ## How it decides
 
 - **Incident history.** Each vendor's own public status history (Statuspage incidents with per-component status changes, the AWS Health history, the Google Cloud incident feed, Azure post-incident reviews), refreshed hourly. Every file is archived exactly as fetched, with its sha256.

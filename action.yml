@@ -1,0 +1,34 @@
+name: MONEY OWED SLA credit check
+description: Checks your software vendors against their own uptime promise each month and opens an issue with the claim when a service credit is owed.
+author: Jennycruzy
+branding:
+  icon: dollar-sign
+  color: green
+inputs:
+  vendors:
+    description: >-
+      One vendor per line, as vendor[:plan][=monthly bill in USD], for example "jira:premium=1200" or "github".
+      Run `npx github:Jennycruzy/moneyowed vendors` for the list.
+    required: true
+  period:
+    description: Period to check, for example 2026-10 or 2026-Q3. Defaults to the last closed month (last closed quarter for quarterly SLAs).
+    required: false
+    default: ''
+  open-issue:
+    description: Open (or update) one issue per owed credit, with the claim text and deadline.
+    required: false
+    default: 'true'
+  github-token:
+    description: Token used to open issues. The default workflow token works when the job has `issues: write`.
+    required: false
+    default: ${{ github.token }}
+  api:
+    description: MONEY OWED server to ask.
+    required: false
+    default: https://moneyowed.38-49-216-59.sslip.io
+outputs:
+  owed:
+    description: Number of vendors with a credit owed and the claim window still open.
+runs:
+  using: node20
+  main: action/run.mjs

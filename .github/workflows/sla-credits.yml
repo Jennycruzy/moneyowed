@@ -1,0 +1,24 @@
+# Example: the MONEY OWED action on a schedule. Copy this file into your own repo and list your vendors.
+name: SLA credits
+on:
+  schedule:
+    - cron: '0 9 2 * *'   # the 2nd of each month, after the last month has closed
+  workflow_dispatch:
+    inputs:
+      period:
+        description: Period to check (empty = last closed month or quarter)
+        required: false
+permissions:
+  issues: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Jennycruzy/moneyowed@build
+        with:
+          period: ${{ inputs.period }}
+          vendors: |
+            sanity:e1=2000
+            jira:premium=1200
+            github=2100
+            vercel=3000
