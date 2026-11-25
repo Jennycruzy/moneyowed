@@ -241,7 +241,7 @@ export function checkCredit(input, { slaDir = path.resolve(process.env.MONEYOWED
   const total = owed.every((s) => s.credit_usd != null) ? Math.round(owed.reduce((t, s) => t + s.credit_usd, 0) * 100) / 100 : null;
   return {
     code, vendor: card.vendor, vendor_name: card.name, plan: plan.plan, plan_label: plan.label, period: input.period,
-    period_start: periodStart, period_end: periodEnd, mode, regions,
+    period_start: periodStart, period_end: periodEnd, period_utc_offset_hours: plan.period_utc_offset_hours || 0, mode, regions,
     owed_services: owed.map((s) => s.service), credit_usd_total: total,
     deadline: deadline.date, deadline_rule: deadline.rule, days_left: deadline.date ? Math.ceil((deadline.date - now) / DAY) : null,
     claim: { channel: plan.claim.channel, quote: plan.claim.quote || null, note: plan.claim.note || null },

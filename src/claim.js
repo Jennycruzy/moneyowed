@@ -18,7 +18,9 @@ export function draftClaim(result, { customer = '[your company]', account = '[yo
   lines.push('');
   lines.push(`Hello ${result.vendor_name} team,`);
   lines.push('');
-  lines.push(`${customer} (${account}) requests the service credit owed under your published SLA (${result.card.sla_url}) for ${result.plan_label}, period ${result.period} (${day(result.period_start)} to ${day(new Date(+new Date(result.period_end) - 1))}${result.regions.length ? `, regions: ${result.regions.join(', ')}` : ''}).`);
+  const off = (result.period_utc_offset_hours || 0) * 3600000;
+  const zone = off ? ', each day counted from the midnight your SLA names' : '';
+  lines.push(`${customer} (${account}) requests the service credit owed under your published SLA (${result.card.sla_url}) for ${result.plan_label}, period ${result.period} (${day(+new Date(result.period_start) + off)} to ${day(+new Date(result.period_end) + off - 1)}${zone}${result.regions.length ? `, regions: ${result.regions.join(', ')}` : ''}).`);
   lines.push('');
   for (const s of owed) {
     lines.push(`${s.service}: uptime ${s.uptime_pct}% against the ${s.threshold_pct}% commitment (${s.covered_minutes} minutes of unavailability; ${s.allowed_minutes} allowed). Credit tier: ${s.credit_pct}%${s.credit_usd != null ? ` = $${s.credit_usd.toFixed(2)} on fees of $${Number(s.fee).toFixed(2)}` : ''}.`);

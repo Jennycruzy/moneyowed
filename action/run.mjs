@@ -62,7 +62,7 @@ async function main() {
       if (openIssue && token && repo) {
         const c = draftClaim(r);
         const body = [`**${r.vendor_name} owes a service credit for ${r.period}**: ${s.service} was up ${s.uptime_pct}% against the ${s.threshold_pct}% in its SLA. Credit: ${money}.`, '',
-          `**Claim by ${String(r.deadline).slice(0, 10)}** (${r.deadline_rule}). Send to: ${c.to}`, '', '```text', `Subject: ${c.subject}`, '', c.body, '```', '',
+          `**Claim by ${String(r.deadline).slice(0, 10)}** (${r.deadline_rule}). Send to: ${c.to}`, '', '```text', c.body, '```', '',
           `Every counted incident, the contract wording and an offline proof: ${api}/check/${r.id}`,
           paid.length ? `Second opinions bought on Telegraph for this check: ${paid.length} (${paid.map((o) => o.miner_name || o.miner_id).join(', ')}).` : ''].join('\n');
         link = await upsertIssue(`SLA credit owed: ${r.vendor_name} ${r.period}`, body);
