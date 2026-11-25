@@ -77,7 +77,7 @@ ${open.length ? `<section class="block"><div class="block-head"><h2>Claims you c
     }[r.code];
     const actions = [
       ['OWED', 'PERIOD_OPEN'].includes(r.code) && owed.length ? `<a class="btn" href="/claim/${esc(id)}">Open the claim draft</a>` : '',
-      `<a class="btn ghost" href="/check/${esc(id)}/proof.json">Download proof file</a>`,
+      `<a class="btn ghost" href="/check/${esc(id)}/proof.json" download="moneyowed-proof-${esc(id)}.json">Download proof file</a>`,
       `<a class="btn ghost" href="/check/${esc(id)}.json">JSON</a>`,
     ].join('');
     const svc = r.services.map((s) => {
