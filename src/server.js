@@ -14,7 +14,7 @@ import { buySecondOpinions } from './evidence.js';
 import { page, esc, money, pct, dt, dayOnly, badge } from './views.js';
 import { landingData, renderLanding } from './landing.js';
 import { makePages } from './pages.js';
-import { answerSla, ERROR_STATUS } from './miner.js';
+import { answerSla, abstainSla, ERROR_STATUS } from './miner.js';
 import { buildProof } from './proof.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -144,7 +144,7 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'content-type': 'text/csv; charset=utf-8' });
       return res.end([cols.join(','), ...r.rows.map((x) => cols.map((c) => JSON.stringify(x[c] ?? '')).join(','))].join('\n'));
     }
-    if (p === '/miner/sla' && (req.method === 'GET' || req.method === 'POST')) {
+    if ((p === '/miner/sla' || p === '/sla-compliance') && (req.method === 'GET' || req.method === 'POST')) {
       const t0 = Date.now();
       let q = Object.fromEntries(url.searchParams);
       if (req.method === 'POST') { try { q = { ...q, ...JSON.parse((await readBody(req)) || '{}') }; } catch { q = { ...q }; } }
@@ -156,8 +156,8 @@ const server = http.createServer(async (req, res) => {
       } catch (e) {
         const status = ERROR_STATUS[e.code] || 500;
         db.minerCall({ service: q.service || q.question, period: q.period, status, code: e.code || 'ERROR', from_telegraph: fromTelegraph, ms: Date.now() - t0 });
-        if (status === 500) console.error('miner', e);
-        return json(res, status, { error: { code: e.code || 'ERROR', message: status === 500 ? 'internal error' : e.message } });
+        if (status === 500) { console.error('miner', e); return json(res, 500, { error: { code: 'ERROR', message: 'internal error' } }); }
+        return json(res, 200, abstainSla(q, e));
       }
     }
     if (req.method === 'GET' && p === '/sample-invoice') return html(res, 200, pages.sampleInvoice());

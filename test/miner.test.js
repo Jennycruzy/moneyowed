@@ -84,3 +84,16 @@ test('a period that has not started yet is refused, not answered as 100%', async
   const { answerSla } = await import('../src/miner.js');
   assert.throws(() => answerSla({ service: 'github', period: '2027-03' }, { now: new Date('2026-11-21T12:00:00Z') }), /has not started yet/);
 });
+
+test('questions the miner cannot measure get a full answer with no invented number', async () => {
+  const { answerSla, abstainSla } = await import('../src/miner.js');
+  const now = new Date('2026-11-25T00:30:00Z');
+  for (const q of [{ service: 'Alpha', period: '2024-Q1' }, { service: 'Billing', period: 'last 45 days' }, { service: 'github', period: '2027-03' }]) {
+    let err; try { answerSla(q, { now }); } catch (e) { err = e; }
+    assert.ok(err && err.code, `expected a refusal for ${q.service}`);
+    const a = abstainSla(q, err, { now });
+    assert.equal(a.service, q.service); assert.equal(a.period, q.period);
+    assert.equal(a.uptime_pct, null); assert.equal(a.sla_target_pct, null); assert.equal(a.compliant, null);
+    assert.equal(a.abstained, true); assert.match(a.answer, /^Not measured/); assert.match(a.answer, /GitHub/);
+  }
+});

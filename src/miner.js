@@ -15,7 +15,7 @@ const VENDOR_WORDS = [
   ['jira', /\bjira\b/],
   ['confluence', /\bconfluence\b/],
   ['bitbucket', /\bbitbucket\b/],
-  ['github', /\bgithub\b/],
+  ['github', /\bgithub\b|\bgit operations\b/],
   ['vercel', /\bvercel\b/],
   ['digitalocean', /\bdigital ?ocean\b/],
   ['twilio', /\btwilio\b/],
@@ -187,6 +187,23 @@ export function answerSla(q, { now = new Date() } = {}) {
     scope: 'Contract scope: only time the vendor itself marked a covered service as down (Statuspage partial or major outage per component; AWS service disruption; Google SERVICE_OUTAGE; Azure review stating unavailability) counts. Degraded performance and scheduled maintenance do not.',
     sources: { sla_url: card.sla_url, sla_target_quote: service.threshold_quote || null, incident_history: HISTORY_URL[card.vendor] || `https://${VENDORS.find((v) => v.vendor === card.vendor).host}/history` },
     notes, method: METHOD_VERSION, computed_at: iso(now),
+  };
+}
+
+// A question the miner cannot measure still gets a full, schema-shaped answer: no number is invented,
+// the reason is stated, and the asker is told what can be measured instead.
+export function abstainSla(q, err, { now = new Date() } = {}) {
+  const service = String(q.service || q.question || q.query || '').slice(0, 200);
+  const period = String(q.period || '').slice(0, 100);
+  const covered = listCards().map((c) => c.name).sort().join(', ');
+  const why = String(err.message || 'The request could not be measured.').replace(/([^.])$/, '$1.');
+  const list = /Covered:/.test(why) ? '' : ` Measurable vendors: ${covered}.`;
+  return {
+    service, period, uptime_pct: null, sla_target_pct: null, compliant: null,
+    answer: `Not measured: no uptime figure is given for "${service || 'the service'}"${period ? ` over ${period}` : ''}. ${why} No number is guessed.${list}`,
+    abstained: true, reason_code: err.code || 'ERROR', reason: err.message,
+    covered_vendors: listCards().map((c) => c.vendor).sort(),
+    method: METHOD_VERSION, computed_at: iso(now),
   };
 }
 
