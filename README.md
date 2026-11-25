@@ -14,7 +14,11 @@ In the 12 months to October 2026, 12 of the 17 vendors covered here broke their 
 
 The vendor pays only if the customer files a claim inside a short window (15 to 60 days), in the vendor's format, with the incidents listed. Almost nobody does.
 
-Public write-up with the GitHub and Jira numbers: [post on X](https://x.com/jennyoliver57/status/2124184069105705459).
+Public updates, by date:
+
+- 21 Nov: the GitHub and Jira numbers ([X](https://x.com/jennyoliver57/status/2124184069105705459))
+- 23 Nov: the app, the miner and the evaluation pairs, with three findings for other SLA builders ([Telegraph Discord](https://discord.com/channels/1438396125609463881/1574417365095948360/1574417365095948360))
+- 25 Nov: Sanity's October miss and its closing claim window, plus live uptime and API health answers ([X](https://x.com/jennyoliver57/status/2125708225823556027), [Telegraph Discord](https://discord.com/channels/1438396125609463881/1574417365095948360/1575267771506360472))
 
 ## Try it in two minutes
 
