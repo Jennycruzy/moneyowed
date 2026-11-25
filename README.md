@@ -64,6 +64,8 @@ One vendor per line as `vendor[:plan][=monthly bill in USD]`; `node bin/moneyowe
 
 ## Telegraph
 
+New to Telegraph? [Sell an answer on Telegraph](docs/sell-an-answer-on-telegraph.md) walks through how we built, registered and priced this miner, with the mistakes that cost us points.
+
 MONEY OWED uses Telegraph in two directions.
 
 - **As a buyer.** Each check buys `SLA_COMPLIANCE_GENERAL` answers through the escrow payment path: one from Telegraph's own routing plus direct picks from ranked SLA miners, at $0.01 each. Every purchase is stored with miner, route, cost, latency and answer hash, and shown beside the contract-scoped result, with disagreements explained. Spending limits per user and per day, and a fresh answer to the same question is reused for an hour instead of being bought twice. All purchases: [/purchases.json](https://moneyowed.38-49-216-59.sslip.io/purchases.json).
