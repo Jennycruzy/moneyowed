@@ -19,7 +19,7 @@ inputs:
     required: false
     default: 'true'
   github-token:
-    description: Token used to open issues. The default workflow token works when the job has `issues: write`.
+    description: 'Token used to open issues. The default workflow token works when the job has issues: write permission.'
     required: false
     default: ${{ github.token }}
   api:
