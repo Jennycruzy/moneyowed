@@ -7,3 +7,4 @@ SPEC*
 HANDOFF*
 *-REPORT*
 *.log
+.vercel-out/

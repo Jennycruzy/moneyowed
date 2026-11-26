@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "",
+  "buildCommand": "mkdir -p .vercel-out && echo ok > .vercel-out/.keep",
+  "outputDirectory": ".vercel-out",
+  "rewrites": [
+    { "source": "/", "destination": "https://moneyowed.38-49-216-59.sslip.io/" },
+    { "source": "/:path*", "destination": "https://moneyowed.38-49-216-59.sslip.io/:path*" }
+  ]
+}
