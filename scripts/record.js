@@ -10,6 +10,8 @@ const REGIONS = { aws: ['us-east-1', 'eu-west-1'], gcp: ['us-central1', 'europe-
 const now = new Date();
 const from = new Date(Date.UTC(now.getUTCFullYear() - 1, now.getUTCMonth(), 1));
 const rows = [], skipped = [];
+// The window that is open now: the earliest reading while it lasts, then the later fair reading if the card has one.
+const active = (r, t) => (r.deadline_later && t > r.deadline ? r.deadline_later : r.deadline);
 for (const card of listCards()) {
   for (const plan of card.plans) {
     for (const period of periodsBetween(from, new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)), plan.period)) {
@@ -19,7 +21,7 @@ for (const card of listCards()) {
         for (const s of r.services) rows.push({
           period, vendor: card.vendor, vendor_name: card.name, plan: plan.plan, plan_label: plan.label, service: s.service,
           uptime_pct: s.uptime_pct, threshold_pct: s.threshold_pct, covered_minutes: s.covered_minutes, credit_pct: s.credit_pct,
-          owed: s.credit_pct > 0, deadline: s.credit_pct > 0 ? r.deadline : null, period_end: r.period_end, incidents_counted: s.incidents.filter((i) => i.in_scope).length,
+          owed: s.credit_pct > 0, deadline: s.credit_pct > 0 ? active(r, now) : null, last_day: s.credit_pct > 0 ? (r.deadline_later && now > r.deadline ? r.last_day_later : r.last_day) : null, period_end: r.period_end, incidents_counted: s.incidents.filter((i) => i.in_scope).length,
           regions: r.regions,
         });
       } catch (e) { skipped.push({ vendor: card.vendor, plan: plan.plan, period, code: e.code, reason: e.message }); }

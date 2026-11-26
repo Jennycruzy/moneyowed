@@ -1,74 +1,81 @@
 {
- "vendor": "vercel",
- "name": "Vercel",
- "sla_url": "https://vercel.com/legal/sla",
- "sla_texts": [
-  {
-   "file": "vercel.txt",
-   "sha256": "2fed7038406a6890eb4c8b8ff8ea8bdf67a5fe9ed0cd4d7635b3eb4b5ce19bf3"
-  }
- ],
- "checked_at": "2026-11-21",
- "status": "checked",
- "plans": [
-  {
-   "plan": "enterprise",
-   "label": "Vercel Enterprise",
-   "period": "month",
-   "customer_must_request": true,
-   "claim": {
-    "days_after_eligible": 30,
-    "channel": "Written notice to Vercel with log files showing the downtime",
-    "quote": "you must notify Vercel in writing within thirty (30) days from the time you become eligible to receive a Credit. You must also provide us with log files showing Unscheduled Downtime and the date and time it occurred. If you do not comply with these requirement"
-   },
-   "cap": {
-    "pct_of_fee": 50,
-    "quote": "The maximum aggregate number of Credits issued by us to you for all Unscheduled Downtime in a single billing month will not exceed 50% of the amount due from you for the Services for the applicable month. Credits will be"
-   },
-   "services": [
+  "vendor": "vercel",
+  "name": "Vercel",
+  "sla_url": "https://vercel.com/legal/sla",
+  "sla_texts": [
     {
-     "service": "Vercel Services (content serving)",
-     "threshold_pct": 99.99,
-     "threshold_quote": "available 99.99% of the time, excluding any Excused Downtime",
-     "tiers": [
-      {
-       "from_pct": 99.1,
-       "below_pct": 99.99,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.1,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 50
-      }
-     ],
-     "tiers_quote": "Monthly Uptime Percentage 99.1% to 99.98% 95% to 99% < 95% Percentage of monthly fee* 10 % 25 % 50 % * Percent",
-     "tiers_note": "The published table leaves gaps (99.98-99.99% and 99.0-99.1%); each gap is read as the next tier down, in the customer's favour, and the claim says so.",
-     "match": {
-      "groups": [
-       "CDN"
+      "file": "vercel.txt",
+      "sha256": "bcac3ba7a07788fce60ad659fb025d29a3db3276635a5120610c490f4a0f6a31",
+      "history": [
+        {
+          "sha256": "2fed7038406a6890eb4c8b8ff8ea8bdf67a5fe9ed0cd4d7635b3eb4b5ce19bf3",
+          "replaced": "2026-11-26"
+        }
       ],
-      "components": [
-       "Functions",
-       "Routing Middleware",
-       "DNS",
-       "Image Optimization",
-       "Data Cache",
-       "Firewall",
-       "TLS Certificates"
-      ]
-     },
-     "scope_quote": "the platform as a service that serves your content to your websites and/or applications (\" Services \") available 99.99%"
+      "quotes_rechecked": "2026-11-26"
     }
-   ]
-  }
- ],
- "notes": [
-  "Builds, dashboard, API, CLI and observability are not \"serving content\" and are not counted."
- ]
+  ],
+  "checked_at": "2026-11-21",
+  "status": "checked",
+  "plans": [
+    {
+      "plan": "enterprise",
+      "label": "Vercel Enterprise",
+      "period": "month",
+      "customer_must_request": true,
+      "claim": {
+        "days_after_eligible": 30,
+        "channel": "Written notice to Vercel with log files showing the downtime",
+        "quote": "you must notify Vercel in writing within thirty (30) days from the time you become eligible to receive a Credit. You must also provide us with log files showing Unscheduled Downtime and the date and time it occurred. If you do not comply with these requirement"
+      },
+      "cap": {
+        "pct_of_fee": 50,
+        "quote": "The maximum aggregate number of Credits issued by us to you for all Unscheduled Downtime in a single billing month will not exceed 50% of the amount due from you for the Services for the applicable month. Credits will be"
+      },
+      "services": [
+        {
+          "service": "Vercel Services (content serving)",
+          "threshold_pct": 99.99,
+          "threshold_quote": "available 99.99% of the time, excluding any Excused Downtime",
+          "tiers": [
+            {
+              "from_pct": 99.1,
+              "below_pct": 99.99,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 99.1,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 50
+            }
+          ],
+          "tiers_quote": "Monthly Uptime Percentage 99.1% to 99.98% 95% to 99% < 95% Percentage of monthly fee* 10 % 25 % 50 % * Percent",
+          "tiers_note": "The published table leaves gaps (99.98-99.99% and 99.0-99.1%); each gap is read as the next tier down, in the customer's favour, and the claim says so.",
+          "match": {
+            "groups": [
+              "CDN"
+            ],
+            "components": [
+              "Functions",
+              "Routing Middleware",
+              "DNS",
+              "Image Optimization",
+              "Data Cache",
+              "Firewall",
+              "TLS Certificates"
+            ]
+          },
+          "scope_quote": "the platform as a service that serves your content to your websites and/or applications (\" Services \") available 99.99%"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Builds, dashboard, API, CLI and observability are not \"serving content\" and are not counted."
+  ]
 }

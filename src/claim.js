@@ -34,7 +34,10 @@ export function draftClaim(result, { customer = '[your company]', account = '[yo
     lines.push('');
   }
   if (result.credit_usd_total != null) lines.push(`Total credit requested: $${result.credit_usd_total.toFixed(2)}${result.cap ? ` (within the ${result.cap.pct_of_fee}% monthly cap)` : ''}.`);
-  lines.push(result.deadline ? `This request is made within your claim window (${result.deadline_rule}; window ends ${day(result.deadline)}).` : `${result.deadline_rule}`);
+  const last = result.last_day || day(new Date(+new Date(result.deadline) - 1));
+  if (!result.deadline) lines.push(`${result.deadline_rule}`);
+  else if (result.deadline_later && new Date() > new Date(result.deadline)) lines.push(`This request is made within the claim window: the SLA allows ${result.deadline_later_rule.replace(', if eligibility starts when the period closes', '')}, as the credit became final when the period closed (last day ${result.last_day_later}).`);
+  else lines.push(`This request is made within your claim window (${result.deadline_rule}; last day ${last}).`);
   lines.push('We can provide our own request logs for these times on request.');
   lines.push('');
   lines.push('Thank you,');

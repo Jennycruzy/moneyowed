@@ -4,6 +4,8 @@ export const money = (n) => (n == null ? '' : `$${Number(n).toLocaleString('en-U
 export const pct = (n) => (n == null ? '' : `${Number(n).toFixed(Number(n) % 1 === 0 ? 0 : Number(n) >= 99 ? 3 : 2).replace(/0+$/, '').replace(/\.$/, '')}%`);
 export const dt = (d) => (d ? new Date(d).toISOString().replace('T', ' ').slice(0, 16) : 'ongoing');
 export const dayOnly = (d) => (d ? new Date(d).toISOString().slice(0, 10) : '');
+// When a claim window closes, as a moment: "00:00 UTC on 16 Jul 2026".
+export const closesAt = (d) => (d ? `${new Date(d).toISOString().slice(11, 16)} UTC on ${longDay(d)}` : '');
 export const longDay = (d) => (d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '');
 const LABEL = { OWED: 'Owed', NOT_OWED: 'Not owed', WINDOW_CLOSED: 'Window closed', PERIOD_OPEN: 'Period open', TERMS_CHANGED: 'Terms changed', NO_HISTORY: 'No history', VENDOR_NOT_COVERED: 'Not covered', PLAN_NOT_COVERED: 'No SLA on that plan', BAD_INPUT: 'Check the input', LIMIT_REACHED: 'Spending limit' };
 export const badge = (code) => `<span class="badge b-${esc(code)}">${esc(LABEL[code] || code)}</span>`;

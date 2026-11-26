@@ -1,5 +1,9 @@
 node_modules/
-data/
+# data/ is local state; the vendor SLA texts the rule cards quote are kept so a fresh clone can test
+data/*
+!data/sla/
+data/sla/*
+!data/sla/*.txt
 .env
 .env.*
 .private/

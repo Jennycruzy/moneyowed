@@ -5,6 +5,7 @@ import { checkCredit } from './engine.js';
 import { listCards } from './cards.js';
 import { draftClaim } from './claim.js';
 import { esc } from './views.js';
+import { lastDay } from './engine.js';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const DAY = 86400000;
@@ -146,7 +147,7 @@ export function renderLanding(d, { vendorsOptions }) {
   <div class="strip-foot">
     <p><b class="mono">${Math.round(s.counted_minutes)}</b> minutes down on covered services. The contract allows <b class="mono">${Math.round(s.allowed)}</b>.</p>
     <p><b class="mono">${s.counted_n}</b> of ${s.total_n} incidents counted. The rest were Copilot, Codespaces, or only “degraded”, which the SLA does not pay for.</p>
-    <p>Claim window: 30 days after the quarter. ${new Date(s.deadline) < new Date() ? `Closed ${longDay(s.deadline)}.` : `Open until ${longDay(s.deadline)}.`}</p>
+    <p>Claim window: 30 days after the quarter. ${new Date(s.deadline) < new Date() ? `Last day to claim was ${longDay(lastDay(s.deadline))}.` : `Last day to claim: ${longDay(lastDay(s.deadline))}.`}</p>
   </div>
 </section>
 

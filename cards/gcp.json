@@ -1,372 +1,428 @@
 {
- "vendor": "gcp",
- "name": "Google Cloud",
- "sla_url": "https://cloud.google.com/terms/sla",
- "sla_texts": [
-  {
-   "file": "gcp_bigquery.txt",
-   "sha256": "67d013790db86f7be0c206b33d8e55c5ef8da75495b521494189b6f77851627f"
-  },
-  {
-   "file": "gcp_compute.txt",
-   "sha256": "b08fefb315cc6ef82866c611102f43ca2110db5fd373229d8ff2395de682f118"
-  },
-  {
-   "file": "gcp_firestore.txt",
-   "sha256": "5289b7a991f7633ce5b0710ed37e59825024b7397beba11a910854fce0ad97ae"
-  },
-  {
-   "file": "gcp_functions.txt",
-   "sha256": "3d8dc835d03f946ba92b1bf32a35eccb3c0bf975f61ca4440f88ccea5f770203"
-  },
-  {
-   "file": "gcp_kubernetes-engine.txt",
-   "sha256": "1f1981d334b2e40883ae8c6add3b79b64925ea5179a9c36feda745297f27978b"
-  },
-  {
-   "file": "gcp_pubsub.txt",
-   "sha256": "7610d1bfac648fb5984092b02c33919560bb26c61af6227aa6fdbc4b4badf178"
-  },
-  {
-   "file": "gcp_run.txt",
-   "sha256": "dff63c6cbffecf2ff557621d921d2c4ca996570c71f33b95ff5c4ba042b7d4ee"
-  },
-  {
-   "file": "gcp_sql.txt",
-   "sha256": "1f6a0952de299bf3b0380547ae1876b0659bda6a3da473c714655f9ae8030dc7"
-  },
-  {
-   "file": "gcp_storage.txt",
-   "sha256": "11e06e074a5f983e13679cb7c448dda67938e501f8d7e62335c58cbf5b92b439"
-  }
- ],
- "checked_at": "2026-11-21",
- "status": "checked",
- "plans": [
-  {
-   "plan": "standard",
-   "label": "Google Cloud (per product, per region)",
-   "period": "month",
-   "customer_must_request": true,
-   "per_region": true,
-   "claim": {
-    "days_after_eligible": 30,
-    "channel": "Notify Google technical support with log files showing the downtime periods",
-    "quote": "within 30 days from the time Customer becomes eligible to receive a Financial Credit. Customer must also provide Google with log files showing Downtime Periods and the date and time they occurred. If"
-   },
-   "services": [
+  "vendor": "gcp",
+  "name": "Google Cloud",
+  "sla_url": "https://cloud.google.com/terms/sla",
+  "sla_texts": [
     {
-     "service": "Compute Engine",
-     "threshold_pct": 99.9,
-     "threshold_quote": "95.00% - < 99.90% 10% 90.00% - < 95.00% 25% < 90.00% 100%",
-     "tiers": [
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.9,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 90.0,
-       "below_pct": 95.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 90.0,
-       "credit_pct": 100
-      }
-     ],
-     "tiers_quote": "95.00% - < 99.90% 10% 90.00% - < 95.00% 25% < 90.00% 100%",
-     "match": {
-      "cloud_products": [
-       "Google Compute Engine"
-      ]
-     },
-     "global": false,
-     "file": "gcp_compute.txt",
-     "config_note": "Single instance (all other families)."
+      "file": "gcp_bigquery.txt",
+      "sha256": "852ceea1cb894f8d5de5f4dfc2020e4127fd3b310c62e0afa0f5dc6416b262ec",
+      "history": [
+        {
+          "sha256": "67d013790db86f7be0c206b33d8e55c5ef8da75495b521494189b6f77851627f",
+          "replaced": "2026-11-26"
+        }
+      ],
+      "quotes_rechecked": "2026-11-26"
     },
     {
-     "service": "Cloud Storage",
-     "threshold_pct": 99.0,
-     "threshold_quote": "98.0% – < 99.0% 10% 95.0% – < 98.0% 25% < 95.0% 50%",
-     "tiers": [
-      {
-       "from_pct": 98.0,
-       "below_pct": 99.0,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 98.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 50
-      }
-     ],
-     "tiers_quote": "98.0% – < 99.0% 10% 95.0% – < 98.0% 25% < 95.0% 50%",
-     "match": {
-      "cloud_products": [
-       "Google Cloud Storage"
-      ]
-     },
-     "global": false,
-     "file": "gcp_storage.txt",
-     "config_note": "Lowest-promise storage classes; Standard regional is higher."
+      "file": "gcp_compute.txt",
+      "sha256": "709be9f6bb56e24e8f7bb460054c35bea5c4547225e4fb1c9176da6d3e10d903",
+      "history": [
+        {
+          "sha256": "b08fefb315cc6ef82866c611102f43ca2110db5fd373229d8ff2395de682f118",
+          "replaced": "2026-11-26"
+        }
+      ],
+      "quotes_rechecked": "2026-11-26"
     },
     {
-     "service": "Cloud SQL",
-     "threshold_pct": 99.95,
-     "threshold_quote": "99.0% - < 99.95% 10% 95.0% - < 99.0% 25% < 95.0% 50%",
-     "tiers": [
-      {
-       "from_pct": 99.0,
-       "below_pct": 99.95,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 50
-      }
-     ],
-     "tiers_quote": "99.0% - < 99.95% 10% 95.0% - < 99.0% 25% < 95.0% 50%",
-     "match": {
-      "cloud_products": [
-       "Google Cloud SQL"
-      ]
-     },
-     "global": false,
-     "file": "gcp_sql.txt",
-     "config_note": "Enterprise edition. Enterprise Plus is 99.99%."
+      "file": "gcp_firestore.txt",
+      "sha256": "2d8675a5c9723544aed429b8c496461787f7b298b8e70d6e6602da4afba70748",
+      "history": [
+        {
+          "sha256": "5289b7a991f7633ce5b0710ed37e59825024b7397beba11a910854fce0ad97ae",
+          "replaced": "2026-11-26"
+        }
+      ],
+      "quotes_rechecked": "2026-11-26"
     },
     {
-     "service": "Cloud Run",
-     "threshold_pct": 99.5,
-     "threshold_quote": "99.00% to < 99.5% 10% 95.00% to < 99.00% 25% < 95.00% 50%",
-     "tiers": [
-      {
-       "from_pct": 99.0,
-       "below_pct": 99.5,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 50
-      }
-     ],
-     "tiers_quote": "99.00% to < 99.5% 10% 95.00% to < 99.00% 25% < 95.00% 50%",
-     "match": {
-      "cloud_products": [
-       "Cloud Run"
-      ]
-     },
-     "global": false,
-     "file": "gcp_run.txt",
-     "config_note": "Lowest promise (GPU without zonal redundancy). Non-GPU is higher."
+      "file": "gcp_functions.txt",
+      "sha256": "d01381b89ea5aab587cec00c6bd8050af02b16cf595578ba494aa0c459b32f3a",
+      "history": [
+        {
+          "sha256": "3d8dc835d03f946ba92b1bf32a35eccb3c0bf975f61ca4440f88ccea5f770203",
+          "replaced": "2026-11-26"
+        }
+      ],
+      "quotes_rechecked": "2026-11-26"
     },
     {
-     "service": "Google Kubernetes Engine",
-     "threshold_pct": 99.5,
-     "threshold_quote": "Regional Cluster (control plane) or Autopilot Cluster (control plane) Zonal Cluster (control plane) Autopilot Pods in Multiple Zones 99.0% to < 99.95% 99.0% to < 99.50% 99.0% to < 99.9% 10% 95.0% to < 99.0% 95.0% to < 99.0% 95.0% to < 99.0% 25% < 95.0% < 95.0% < 95.0% 50%",
-     "tiers": [
-      {
-       "from_pct": 99.0,
-       "below_pct": 99.5,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 50
-      }
-     ],
-     "tiers_quote": "Regional Cluster (control plane) or Autopilot Cluster (control plane) Zonal Cluster (control plane) Autopilot Pods in Multiple Zones 99.0% to < 99.95% 99.0% to < 99.50% 99.0% to < 99.9% 10% 95.0% to < 99.0% 95.0% to < 99.0% 95.0% to < 99.0% 25% < 95.0% < 95.0% < 95.0% 50%",
-     "match": {
-      "cloud_products": [
-       "Google Kubernetes Engine"
-      ]
-     },
-     "global": false,
-     "file": "gcp_kubernetes-engine.txt",
-     "config_note": "Zonal cluster control plane (middle column). Regional clusters are higher."
+      "file": "gcp_kubernetes-engine.txt",
+      "sha256": "653c3275b2355f886c50029e722b7ef2c212d1b67eaee31018f64ac49a451325",
+      "history": [
+        {
+          "sha256": "1f1981d334b2e40883ae8c6add3b79b64925ea5179a9c36feda745297f27978b",
+          "replaced": "2026-11-26"
+        }
+      ],
+      "quotes_rechecked": "2026-11-26"
     },
     {
-     "service": "BigQuery",
-     "threshold_pct": 99.9,
-     "threshold_quote": "99.0% – < 99.9% 10% 95.0% – < 99.0% 25% < 95.0% 50%",
-     "tiers": [
-      {
-       "from_pct": 99.0,
-       "below_pct": 99.9,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 50
-      }
-     ],
-     "tiers_quote": "99.0% – < 99.9% 10% 95.0% – < 99.0% 25% < 95.0% 50%",
-     "match": {
-      "cloud_products": [
-       "Google BigQuery"
-      ]
-     },
-     "global": false,
-     "file": "gcp_bigquery.txt",
-     "config_note": "Standard edition. Other editions are 99.99%."
+      "file": "gcp_pubsub.txt",
+      "sha256": "d794b003eddafebbc65dde12579755bd10c05b2cf337cea04feb592f03426727",
+      "history": [
+        {
+          "sha256": "7610d1bfac648fb5984092b02c33919560bb26c61af6227aa6fdbc4b4badf178",
+          "replaced": "2026-11-26"
+        }
+      ],
+      "quotes_rechecked": "2026-11-26"
     },
     {
-     "service": "Pub/Sub",
-     "threshold_pct": 99.95,
-     "threshold_quote": "99% to <99.95% 10% 95% to <99% 25% <95% 50%",
-     "tiers": [
-      {
-       "from_pct": 99.0,
-       "below_pct": 99.95,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 50
-      }
-     ],
-     "tiers_quote": "99% to <99.95% 10% 95% to <99% 25% <95% 50%",
-     "match": {
-      "cloud_products": [
-       "Google Cloud Pub/Sub"
-      ]
-     },
-     "global": false,
-     "file": "gcp_pubsub.txt",
-     "config_note": "Pub/Sub service (not Pub/Sub Lite)."
+      "file": "gcp_run.txt",
+      "sha256": "768e923b5dabbdb1bfdafc438b64e37dc226e4f9460f5db6c68847bbe1888805",
+      "history": [
+        {
+          "sha256": "dff63c6cbffecf2ff557621d921d2c4ca996570c71f33b95ff5c4ba042b7d4ee",
+          "replaced": "2026-11-26"
+        }
+      ],
+      "quotes_rechecked": "2026-11-26"
     },
     {
-     "service": "Cloud Load Balancing",
-     "threshold_pct": 99.9,
-     "threshold_quote": "99.00% - < 99.99% (Premium Tier) 99.00% - < 99.9% (Standard Tier) 10% 95.00% - < 99.00% (Premium and Standard Tier) 25% < 95.00% (Premium and Standard Tier) 100%",
-     "tiers": [
-      {
-       "from_pct": 99.0,
-       "below_pct": 99.9,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 100
-      }
-     ],
-     "tiers_quote": "99.00% - < 99.99% (Premium Tier) 99.00% - < 99.9% (Standard Tier) 10% 95.00% - < 99.00% (Premium and Standard Tier) 25% < 95.00% (Premium and Standard Tier) 100%",
-     "match": {
-      "cloud_products": [
-       "Cloud Load Balancing"
-      ]
-     },
-     "global": true,
-     "file": "gcp_compute.txt",
-     "config_note": "Covered by the Compute Engine SLA; Standard Tier (Premium Tier is 99.99%)."
+      "file": "gcp_sql.txt",
+      "sha256": "1f6a0952de299bf3b0380547ae1876b0659bda6a3da473c714655f9ae8030dc7"
     },
     {
-     "service": "Cloud Functions",
-     "threshold_pct": 99.95,
-     "threshold_quote": "99% to < 99.95% 10% 95% to < 99% 25% < 95% 50%",
-     "tiers": [
-      {
-       "from_pct": 99.0,
-       "below_pct": 99.95,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 50
-      }
-     ],
-     "tiers_quote": "99% to < 99.95% 10% 95% to < 99% 25% < 95% 50%",
-     "match": {
-      "cloud_products": [
-       "Google Cloud Functions",
-       "Cloud Run functions"
-      ]
-     },
-     "global": false,
-     "file": "gcp_functions.txt"
-    },
-    {
-     "service": "Firestore",
-     "threshold_pct": 99.95,
-     "threshold_quote": "99.0% – < 99.95% 10% 95.0% – < 99.0% 25% < 95.0% 50%",
-     "tiers": [
-      {
-       "from_pct": 99.0,
-       "below_pct": 99.95,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 95.0,
-       "below_pct": 99.0,
-       "credit_pct": 25
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 95.0,
-       "credit_pct": 50
-      }
-     ],
-     "tiers_quote": "99.0% – < 99.95% 10% 95.0% – < 99.0% 25% < 95.0% 50%",
-     "match": {
-      "cloud_products": [
-       "Cloud Firestore",
-       "Firestore"
-      ]
-     },
-     "global": false,
-     "file": "gcp_firestore.txt",
-     "config_note": "Regional (lowest listed). Multi-region is higher."
+      "file": "gcp_storage.txt",
+      "sha256": "5b85f10a1649584442114c2026c968d59a912a355bba3a7a50c805545facb76b",
+      "history": [
+        {
+          "sha256": "11e06e074a5f983e13679cb7c448dda67938e501f8d7e62335c58cbf5b92b439",
+          "replaced": "2026-11-26"
+        }
+      ],
+      "quotes_rechecked": "2026-11-26"
     }
-   ]
-  }
- ]
+  ],
+  "checked_at": "2026-11-21",
+  "status": "checked",
+  "plans": [
+    {
+      "plan": "standard",
+      "label": "Google Cloud (per product, per region)",
+      "period": "month",
+      "customer_must_request": true,
+      "per_region": true,
+      "claim": {
+        "days_after_eligible": 30,
+        "channel": "Notify Google technical support with log files showing the downtime periods",
+        "quote": "within 30 days from the time Customer becomes eligible to receive a Financial Credit. Customer must also provide Google with log files showing Downtime Periods and the date and time they occurred. If"
+      },
+      "services": [
+        {
+          "service": "Compute Engine",
+          "threshold_pct": 99.9,
+          "threshold_quote": "95.00% - < 99.90% 10% 90.00% - < 95.00% 25% < 90.00% 100%",
+          "tiers": [
+            {
+              "from_pct": 95,
+              "below_pct": 99.9,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 90,
+              "below_pct": 95,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 90,
+              "credit_pct": 100
+            }
+          ],
+          "tiers_quote": "95.00% - < 99.90% 10% 90.00% - < 95.00% 25% < 90.00% 100%",
+          "match": {
+            "cloud_products": [
+              "Google Compute Engine"
+            ]
+          },
+          "global": false,
+          "file": "gcp_compute.txt",
+          "config_note": "Single instance (all other families)."
+        },
+        {
+          "service": "Cloud Storage",
+          "threshold_pct": 99,
+          "threshold_quote": "98.0% – < 99.0% 10% 95.0% – < 98.0% 25% < 95.0% 50%",
+          "tiers": [
+            {
+              "from_pct": 98,
+              "below_pct": 99,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 98,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 50
+            }
+          ],
+          "tiers_quote": "98.0% – < 99.0% 10% 95.0% – < 98.0% 25% < 95.0% 50%",
+          "match": {
+            "cloud_products": [
+              "Google Cloud Storage"
+            ]
+          },
+          "global": false,
+          "file": "gcp_storage.txt",
+          "config_note": "Lowest-promise storage classes; Standard regional is higher."
+        },
+        {
+          "service": "Cloud SQL",
+          "threshold_pct": 99.95,
+          "threshold_quote": "99.0% - < 99.95% 10% 95.0% - < 99.0% 25% < 95.0% 50%",
+          "tiers": [
+            {
+              "from_pct": 99,
+              "below_pct": 99.95,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 99,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 50
+            }
+          ],
+          "tiers_quote": "99.0% - < 99.95% 10% 95.0% - < 99.0% 25% < 95.0% 50%",
+          "match": {
+            "cloud_products": [
+              "Google Cloud SQL"
+            ]
+          },
+          "global": false,
+          "file": "gcp_sql.txt",
+          "config_note": "Enterprise edition. Enterprise Plus is 99.99%."
+        },
+        {
+          "service": "Cloud Run",
+          "threshold_pct": 99.5,
+          "threshold_quote": "99.00% to < 99.5% 10% 95.00% to < 99.00% 25% < 95.00% 50%",
+          "tiers": [
+            {
+              "from_pct": 99,
+              "below_pct": 99.5,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 99,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 50
+            }
+          ],
+          "tiers_quote": "99.00% to < 99.5% 10% 95.00% to < 99.00% 25% < 95.00% 50%",
+          "match": {
+            "cloud_products": [
+              "Cloud Run"
+            ]
+          },
+          "global": false,
+          "file": "gcp_run.txt",
+          "config_note": "Lowest promise (GPU without zonal redundancy). Non-GPU is higher."
+        },
+        {
+          "service": "Google Kubernetes Engine",
+          "threshold_pct": 99.5,
+          "threshold_quote": "Regional Cluster (control plane) or Autopilot Cluster (control plane) Zonal Cluster (control plane) Autopilot Pods in Multiple Zones 99.0% to < 99.95% 99.0% to < 99.50% 99.0% to < 99.9% 10% 95.0% to < 99.0% 95.0% to < 99.0% 95.0% to < 99.0% 25% < 95.0% < 95.0% < 95.0% 50%",
+          "tiers": [
+            {
+              "from_pct": 99,
+              "below_pct": 99.5,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 99,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 50
+            }
+          ],
+          "tiers_quote": "Regional Cluster (control plane) or Autopilot Cluster (control plane) Zonal Cluster (control plane) Autopilot Pods in Multiple Zones 99.0% to < 99.95% 99.0% to < 99.50% 99.0% to < 99.9% 10% 95.0% to < 99.0% 95.0% to < 99.0% 95.0% to < 99.0% 25% < 95.0% < 95.0% < 95.0% 50%",
+          "match": {
+            "cloud_products": [
+              "Google Kubernetes Engine"
+            ]
+          },
+          "global": false,
+          "file": "gcp_kubernetes-engine.txt",
+          "config_note": "Zonal cluster control plane (middle column). Regional clusters are higher."
+        },
+        {
+          "service": "BigQuery",
+          "threshold_pct": 99.9,
+          "threshold_quote": "99.0% – < 99.9% 10% 95.0% – < 99.0% 25% < 95.0% 50%",
+          "tiers": [
+            {
+              "from_pct": 99,
+              "below_pct": 99.9,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 99,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 50
+            }
+          ],
+          "tiers_quote": "99.0% – < 99.9% 10% 95.0% – < 99.0% 25% < 95.0% 50%",
+          "match": {
+            "cloud_products": [
+              "Google BigQuery"
+            ]
+          },
+          "global": false,
+          "file": "gcp_bigquery.txt",
+          "config_note": "Standard edition. Other editions are 99.99%."
+        },
+        {
+          "service": "Pub/Sub",
+          "threshold_pct": 99.95,
+          "threshold_quote": "99% to <99.95% 10% 95% to <99% 25% <95% 50%",
+          "tiers": [
+            {
+              "from_pct": 99,
+              "below_pct": 99.95,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 99,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 50
+            }
+          ],
+          "tiers_quote": "99% to <99.95% 10% 95% to <99% 25% <95% 50%",
+          "match": {
+            "cloud_products": [
+              "Google Cloud Pub/Sub"
+            ]
+          },
+          "global": false,
+          "file": "gcp_pubsub.txt",
+          "config_note": "Pub/Sub service (not Pub/Sub Lite)."
+        },
+        {
+          "service": "Cloud Load Balancing",
+          "threshold_pct": 99.9,
+          "threshold_quote": "99.00% - < 99.99% (Premium Tier) 99.00% - < 99.9% (Standard Tier) 10% 95.00% - < 99.00% (Premium and Standard Tier) 25% < 95.00% (Premium and Standard Tier) 100%",
+          "tiers": [
+            {
+              "from_pct": 99,
+              "below_pct": 99.9,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 99,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 100
+            }
+          ],
+          "tiers_quote": "99.00% - < 99.99% (Premium Tier) 99.00% - < 99.9% (Standard Tier) 10% 95.00% - < 99.00% (Premium and Standard Tier) 25% < 95.00% (Premium and Standard Tier) 100%",
+          "match": {
+            "cloud_products": [
+              "Cloud Load Balancing"
+            ]
+          },
+          "global": true,
+          "file": "gcp_compute.txt",
+          "config_note": "Covered by the Compute Engine SLA; Standard Tier (Premium Tier is 99.99%)."
+        },
+        {
+          "service": "Cloud Functions",
+          "threshold_pct": 99.95,
+          "threshold_quote": "99% to < 99.95% 10% 95% to < 99% 25% < 95% 50%",
+          "tiers": [
+            {
+              "from_pct": 99,
+              "below_pct": 99.95,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 99,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 50
+            }
+          ],
+          "tiers_quote": "99% to < 99.95% 10% 95% to < 99% 25% < 95% 50%",
+          "match": {
+            "cloud_products": [
+              "Google Cloud Functions",
+              "Cloud Run functions"
+            ]
+          },
+          "global": false,
+          "file": "gcp_functions.txt"
+        },
+        {
+          "service": "Firestore",
+          "threshold_pct": 99.95,
+          "threshold_quote": "99.0% – < 99.95% 10% 95.0% – < 99.0% 25% < 95.0% 50%",
+          "tiers": [
+            {
+              "from_pct": 99,
+              "below_pct": 99.95,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 95,
+              "below_pct": 99,
+              "credit_pct": 25
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 95,
+              "credit_pct": 50
+            }
+          ],
+          "tiers_quote": "99.0% – < 99.95% 10% 95.0% – < 99.0% 25% < 95.0% 50%",
+          "match": {
+            "cloud_products": [
+              "Cloud Firestore",
+              "Firestore"
+            ]
+          },
+          "global": false,
+          "file": "gcp_firestore.txt",
+          "config_note": "Regional (lowest listed). Multi-region is higher."
+        }
+      ]
+    }
+  ]
 }

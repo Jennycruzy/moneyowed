@@ -71,7 +71,13 @@ async function onCheck(chat, args) {
   const head = { OWED: '✅ Owed', WINDOW_CLOSED: '⌛ Was owed, window closed', NOT_OWED: 'Not owed', PERIOD_OPEN: 'Period still running' }[r.code];
   lines.push(`<b>${head}</b> · ${esc(r.plan_label)} · ${esc(r.period)}${r.regions.length ? ` · ${esc(r.regions.join(', '))}` : ''}`);
   for (const s of r.services) lines.push(`${esc(s.service)}: ${s.uptime_pct}% vs ${s.threshold_pct}% · ${s.covered_minutes} min counted${s.credit_pct ? ` · <b>${s.credit_pct}%</b>${s.credit_usd != null ? ` = ${money(s.credit_usd)}` : ''}` : ''}`);
-  if (owed.length) lines.push(r.deadline ? `Claim by <b>${day(r.deadline)}</b> (${r.days_left >= 0 ? `${r.days_left} days left` : 'closed'}). ${esc(r.deadline_rule)}.` : esc(r.deadline_rule));
+  if (owed.length) {
+    const later = r.deadline_later && new Date() > new Date(r.deadline);
+    lines.push(!r.deadline ? esc(r.deadline_rule)
+      : r.code === 'WINDOW_CLOSED' ? `Last day to claim was ${r.last_day_later || r.last_day}. ${esc(r.deadline_rule)}.`
+      : later ? `Claim now: the earliest reading of the window ended ${r.last_day}; counted from the end of the period the last day is <b>${r.last_day_later}</b> (${r.days_left} days left).`
+      : `Last day to claim: <b>${r.last_day}</b> (${r.days_left} days left). ${esc(r.deadline_rule)}.`);
+  }
   if (owed.length && !r.credit_usd_total && spend == null) lines.push('Add your bill to see dollars: /check ' + `${card.vendor} ${period} 2000`);
   if (PUBLIC_URL) lines.push(`${PUBLIC_URL}/check/${id}${['OWED', 'PERIOD_OPEN'].includes(r.code) && owed.length ? `  ·  claim draft: ${PUBLIC_URL}/claim/${id}` : ''}`);
   await send(chat, lines.join('\n'));
@@ -96,7 +102,7 @@ function openWindows() {
 async function onOwed(chat) {
   const rows = openWindows().sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
   if (!rows.length) return send(chat, 'No claim window is open right now for the covered vendors (clouds counted for us-east-1/eu-west-1, us-central1/europe-west1, East US/West Europe).');
-  return send(chat, `<b>Open claim windows</b>\n${rows.slice(0, 25).map((x) => `${esc(x.vendor_name)} ${esc(x.plan_label.replace(x.vendor_name, '').trim())} ${esc(x.period)} · ${esc(x.service)}: ${x.uptime_pct}% → ${x.credit_pct}% · claim by ${day(x.deadline)}`).join('\n')}`);
+  return send(chat, `<b>Open claim windows</b>\n${rows.slice(0, 25).map((x) => `${esc(x.vendor_name)} ${esc(x.plan_label.replace(x.vendor_name, '').trim())} ${esc(x.period)} · ${esc(x.service)}: ${x.uptime_pct}% → ${x.credit_pct}% · last day ${x.last_day || day(new Date(+new Date(x.deadline) - 1))}`).join('\n')}`);
 }
 
 // Alerts: after each record rebuild, tell watchers about owed rows they have not been told about.
@@ -106,7 +112,7 @@ async function sendAlerts() {
     for (const x of rows.filter((r) => r.vendor === w.vendor)) {
       const key = `${x.vendor}|${x.plan}|${x.period}|${x.service}`;
       if (db.db.prepare('SELECT 1 FROM alerts_sent WHERE chat_id = ? AND key = ?').get(w.chat_id, key)) continue;
-      await send(w.chat_id, `🔔 <b>${esc(x.vendor_name)}</b> missed its promise: ${esc(x.service)} ${x.uptime_pct}% vs ${x.threshold_pct}% in ${esc(x.period)}. Credit tier ${x.credit_pct}%. Claim by ${day(x.deadline)}.\n/check ${x.vendor} ${x.period}`);
+      await send(w.chat_id, `🔔 <b>${esc(x.vendor_name)}</b> missed its promise: ${esc(x.service)} ${x.uptime_pct}% vs ${x.threshold_pct}% in ${esc(x.period)}. Credit tier ${x.credit_pct}%. Last day to claim: ${x.last_day || day(new Date(+new Date(x.deadline) - 1))}.\n/check ${x.vendor} ${x.period}`);
       db.db.prepare('INSERT OR IGNORE INTO alerts_sent VALUES (?,?)').run(w.chat_id, key);
     }
   }

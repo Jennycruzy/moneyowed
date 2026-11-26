@@ -144,6 +144,29 @@ test('cloud feed history begins at its earliest record: an earlier period is NO_
   assert.throws(() => checkCredit({ vendor: 'aws', period: '2026-02', regions: ['us-east-1'], now: NOW }), (e) => e.code === 'NO_HISTORY');
 });
 
+test('claim window: the last day is the day before a midnight close (Jira: 15 days after June -> last day 15 Jul)', async () => {
+  const { draftClaim } = await import('../src/claim.js');
+  seed('jira', [sp('j', 'down', new Date('2026-06-10T00:00:00Z'), new Date('2026-06-11T00:00:00Z'), 'major', [], { components: ['Viewing content'] })]);
+  const r = checkCredit({ vendor: 'jira', plan: 'premium', period: '2026-06', spend: 1000, now: NOW });
+  assert.equal(r.code, 'WINDOW_CLOSED');
+  assert.equal(r.deadline.toISOString(), '2026-07-16T00:00:00.000Z');
+  assert.equal(r.last_day, '2026-07-15');
+  assert.equal(r.deadline_later, null);
+  const open = checkCredit({ vendor: 'jira', plan: 'premium', period: '2026-06', spend: 1000, now: '2026-07-02T00:00:00Z' });
+  assert.match(draftClaim(open).body, /last day 2026-07-15/);
+});
+
+test('"30 days from when you become eligible": both fair readings, never called closed while one is open (Vercel)', () => {
+  seed('vercel', [sp('v', 'cdn', new Date('2026-10-05T00:00:00Z'), new Date('2026-10-05T06:00:00Z'), 'critical', [], { components: ['Functions'] })]);
+  const r = checkCredit({ vendor: 'vercel', plan: 'enterprise', period: '2026-10', spend: 2000, now: NOW });
+  assert.equal(r.last_day, '2026-11-04');             // counted from when outage crossed the limit
+  assert.equal(r.last_day_later, '2026-11-30');       // counted from the end of October
+  assert.equal(r.code, 'OWED');                       // the later reading is still open on 21 Nov
+  assert.equal(r.days_left, 10);
+  assert.equal(checkCredit({ vendor: 'vercel', plan: 'enterprise', period: '2026-10', spend: 2000, now: '2026-12-02T00:00:00Z' }).code, 'WINDOW_CLOSED');
+  assert.equal(checkCredit({ vendor: 'vercel', plan: 'enterprise', period: '2026-10', spend: 2000, now: '2026-11-02T00:00:00Z' }).days_left, 3);
+});
+
 test('mailgun per-30-minute credit after the first 0.01%, capped at 50%', () => {
   // Oct: 44,640 min; free 4.464 min. 100 min down -> floor(95.5/30)=3 blocks -> 15%.
   seed('mailgun', [sp('g', 'api', new Date('2026-10-02T00:00:00Z'), new Date('2026-10-02T01:40:00Z'), 'major', [], { components: ['API'] })]);

@@ -1,60 +1,67 @@
 {
- "vendor": "mapbox",
- "name": "Mapbox",
- "sla_url": "https://www.mapbox.com/sla",
- "sla_texts": [
-  {
-   "file": "mapbox.txt",
-   "sha256": "3c864dd402ec652cb5f23bdd618e35a878cc9757560d4c9ff4fe1d6a35b78ee7"
-  }
- ],
- "checked_at": "2026-11-21",
- "status": "checked",
- "plans": [
-  {
-   "plan": "enterprise-order",
-   "label": "Mapbox (APIs under an order with the SLA)",
-   "period": "month",
-   "customer_must_request": true,
-   "claim": {
-    "days_after_breach": 30,
-    "channel": "Email info@mapbox.com with the dates and times of unavailability",
-    "quote": "Customer must contact Mapbox within 30 days following the end of the unavailability via email at info@mapbox.com and include the dates and times of unavailabili"
-   },
-   "services": [
+  "vendor": "mapbox",
+  "name": "Mapbox",
+  "sla_url": "https://www.mapbox.com/sla",
+  "sla_texts": [
     {
-     "service": "Mapbox APIs",
-     "threshold_pct": 99.9,
-     "threshold_quote": "are not available 99.9% of the time every month, Customer wi",
-     "tiers": [
-      {
-       "from_pct": 99.0,
-       "below_pct": 99.9,
-       "credit_pct": 10
-      },
-      {
-       "from_pct": 0,
-       "below_pct": 99.0,
-       "credit_pct": 25
-      }
-     ],
-     "tiers_quote": "Total Available Uptime (across all APIs) per month 100% - 99.9% - 0% Credit Amount 99.89% - 99% - 10% Credit Amount Less than 99% - 25% Credit Amount",
-     "match": {
-      "groups": [
-       "Maps",
-       "Navigation",
-       "Data Services"
+      "file": "mapbox.txt",
+      "sha256": "2e75b74006a4749398efb2881a66cad6c114caa1a131b901b5e7c64a42200e7e",
+      "history": [
+        {
+          "sha256": "3c864dd402ec652cb5f23bdd618e35a878cc9757560d4c9ff4fe1d6a35b78ee7",
+          "replaced": "2026-11-26"
+        }
       ],
-      "components": [
-       "Search"
-      ]
-     },
-     "scope_quote": "Mapbox APIs covered by and used in accordance with such order are not available 99.9% of the time every month, Customer"
+      "quotes_rechecked": "2026-11-26"
     }
-   ]
-  }
- ],
- "notes": [
-  "Mapbox weights uptime by each API's share of your requests; status-page minutes are an upper estimate."
- ]
+  ],
+  "checked_at": "2026-11-21",
+  "status": "checked",
+  "plans": [
+    {
+      "plan": "enterprise-order",
+      "label": "Mapbox (APIs under an order with the SLA)",
+      "period": "month",
+      "customer_must_request": true,
+      "claim": {
+        "days_after_breach": 30,
+        "channel": "Email info@mapbox.com with the dates and times of unavailability",
+        "quote": "Customer must contact Mapbox within 30 days following the end of the unavailability via email at info@mapbox.com and include the dates and times of unavailabili"
+      },
+      "services": [
+        {
+          "service": "Mapbox APIs",
+          "threshold_pct": 99.9,
+          "threshold_quote": "are not available 99.9% of the time every month, Customer wi",
+          "tiers": [
+            {
+              "from_pct": 99,
+              "below_pct": 99.9,
+              "credit_pct": 10
+            },
+            {
+              "from_pct": 0,
+              "below_pct": 99,
+              "credit_pct": 25
+            }
+          ],
+          "tiers_quote": "Total Available Uptime (across all APIs) per month 100% - 99.9% - 0% Credit Amount 99.89% - 99% - 10% Credit Amount Less than 99% - 25% Credit Amount",
+          "match": {
+            "groups": [
+              "Maps",
+              "Navigation",
+              "Data Services"
+            ],
+            "components": [
+              "Search"
+            ]
+          },
+          "scope_quote": "Mapbox APIs covered by and used in accordance with such order are not available 99.9% of the time every month, Customer"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Mapbox weights uptime by each API's share of your requests; status-page minutes are an upper estimate."
+  ]
 }

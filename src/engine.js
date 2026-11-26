@@ -139,11 +139,25 @@ function breachMoment(spans, periodMinutes, thresholdPct) {
 
 function addMonths(d, n) { return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, d.getUTCDate(), d.getUTCHours(), d.getUTCMinutes())); }
 
+// The last calendar day a claim can be sent, in the vendor's billing time zone. A window that closes at 00:00
+// ends the day before ("within 15 days after 30 Jun" closes 00:00 on 16 Jul: the last day is 15 Jul).
+export function lastDay(date, offsetHours = 0) {
+  if (!date) return null;
+  return new Date(+new Date(date) - 1 + offsetHours * 3600000).toISOString().slice(0, 10);
+}
+
 export function claimDeadline(claim, { periodEnd, breachAt, firstIncidentStart }) {
   if (claim.deadline_unstated) return { date: null, rule: 'The SLA does not state a claim window; claim as soon as possible.' };
   if (claim.days_after_period_end !== undefined) return { date: new Date(+periodEnd + claim.days_after_period_end * DAY), rule: `${claim.days_after_period_end} days after the period ends` };
   if (claim.billing_cycles_after_period !== undefined) return { date: addMonths(periodEnd, claim.billing_cycles_after_period), rule: `end of the ${claim.billing_cycles_after_period === 2 ? 'second' : claim.billing_cycles_after_period} billing cycle after the incident (calendar months assumed)` };
-  if (claim.days_after_eligible !== undefined) return { date: breachAt ? new Date(+breachAt + claim.days_after_eligible * DAY) : null, rule: `${claim.days_after_eligible} days from the moment the credit became owed` };
+  // "From the time you become eligible" is not defined in these SLAs. The earliest reading (when counted outage
+  // crossed the limit) is the date to act on; the other fair reading (when the period closes and the credit is
+  // final) is returned too, so a window is never called closed while a fair reading keeps it open.
+  if (claim.days_after_eligible !== undefined) return {
+    date: breachAt ? new Date(+breachAt + claim.days_after_eligible * DAY) : null,
+    rule: `${claim.days_after_eligible} days from the moment the credit became owed`,
+    later: { date: new Date(+periodEnd + claim.days_after_eligible * DAY), rule: `${claim.days_after_eligible} days from the end of the period, if eligibility starts when the period closes` },
+  };
   if (claim.days_after_breach !== undefined) return { date: breachAt ? new Date(+breachAt + claim.days_after_breach * DAY) : null, rule: `${claim.days_after_breach} days from the missed commitment` };
   if (claim.days_after_incident !== undefined) return { date: firstIncidentStart ? new Date(+firstIncidentStart + claim.days_after_incident * DAY) : null, rule: `${claim.days_after_incident} days from the incident (earliest counted incident used)` };
   return { date: null, rule: 'no deadline rule on the card' };
@@ -247,14 +261,19 @@ export function checkCredit(input, { slaDir = path.resolve(process.env.MONEYOWED
   let code;
   if (now < periodEnd) code = 'PERIOD_OPEN';
   else if (!owed.length) code = 'NOT_OWED';
-  else if (deadline.date && now > deadline.date) code = 'WINDOW_CLOSED';
+  else if (deadline.date && now > (deadline.later?.date || deadline.date)) code = 'WINDOW_CLOSED';
   else code = 'OWED';
+  const offH = plan.period_utc_offset_hours || 0;
+  const later = deadline.later && deadline.date ? deadline.later : null;
+  const activeDeadline = later && now > deadline.date ? later.date : deadline.date;
   const total = owed.every((s) => s.credit_usd != null) ? Math.round(owed.reduce((t, s) => t + s.credit_usd, 0) * 100) / 100 : null;
   return {
     code, vendor: card.vendor, vendor_name: card.name, plan: plan.plan, plan_label: plan.label, period: input.period,
     period_start: periodStart, period_end: periodEnd, period_utc_offset_hours: plan.period_utc_offset_hours || 0, mode, regions,
     owed_services: owed.map((s) => s.service), credit_usd_total: total,
-    deadline: deadline.date, deadline_rule: deadline.rule, days_left: deadline.date ? Math.ceil((deadline.date - now) / DAY) : null,
+    deadline: deadline.date, deadline_rule: deadline.rule, last_day: lastDay(deadline.date, offH),
+    deadline_later: later ? later.date : null, deadline_later_rule: later ? later.rule : null, last_day_later: later ? lastDay(later.date, offH) : null,
+    days_left: activeDeadline ? Math.ceil((activeDeadline - now) / DAY) : null,
     claim: { channel: plan.claim.channel, quote: plan.claim.quote || null, note: plan.claim.note || null },
     cap: plan.cap || null, services, card: { sla_url: card.sla_url, texts: card.sla_texts, checked_at: card.checked_at, notes: card.notes || [], page_changed: warnings },
     history: { collected_at: store.collected_at, coverage_from: store.coverage_from || null },

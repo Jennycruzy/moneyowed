@@ -160,26 +160,38 @@ export function answerSla(q, { now = new Date() } = {}) {
     const r = checkCredit({ vendor: card.vendor, plan: plan.plan, period: p.key, regions: regions.length ? regions : undefined, now });
     const s = r.services.find((x) => x.service === service.service);
     m = { uptime_pct: s.uptime_pct, covered_minutes: s.covered_minutes, period_minutes: s.period_minutes, incidents: s.incidents, period_start: r.period_start, period_end: r.period_end };
-    credit = { credit_pct: s.credit_pct, claim_deadline: iso(r.deadline), deadline_rule: r.deadline_rule, verdict: r.code === 'OWED' || r.code === 'WINDOW_CLOSED' ? (s.credit_pct > 0 ? r.code : 'NOT_OWED') : r.code };
+    credit = { credit_pct: s.credit_pct, claim_deadline: iso(r.deadline), last_day_to_claim: r.last_day, deadline_rule: r.deadline_rule,
+      ...(r.deadline_later ? { claim_deadline_later: iso(r.deadline_later), last_day_to_claim_later: r.last_day_later, deadline_later_rule: r.deadline_later_rule } : {}),
+      verdict: r.code === 'OWED' || r.code === 'WINDOW_CLOSED' ? (s.credit_pct > 0 ? r.code : 'NOT_OWED') : r.code };
   } else {
     if (!complete) notes.push('Period still open: uptime counted up to now.');
     notes.push(`The ${plan.label} SLA is measured per calendar ${plan.period}; uptime for any other window is shown for information and is not by itself a credit.`);
     m = measureWindow({ vendor: card.vendor, plan: plan.plan, service: service.service, start: p.start, end: p.end, regions, now });
   }
   const minutes = (new Date(m.period_end) - new Date(m.period_start)) / 60000;
-  const compliant = m.uptime_pct >= service.threshold_pct;
+  // A period still running gets no final verdict, unless counted outage already exceeds what the whole period allows.
+  const inProgress = !complete;
+  const fullMinutes = (p.end - p.start) / 60000;
+  const fullAllowed = Math.round(((100 - service.threshold_pct) / 100) * fullMinutes * 10) / 10;
+  const alreadyMissed = inProgress && m.covered_minutes > fullAllowed;
+  const compliant = inProgress ? (alreadyMissed ? false : null) : m.uptime_pct >= service.threshold_pct;
   const counted = m.incidents.filter((i) => i.in_scope);
   const excluded = m.incidents.filter((i) => !i.in_scope);
   const name = plan.per_region || service.service.includes(card.name) ? service.service : `${card.name} ${service.service}`;
   const planTxt = plan.per_region ? `${card.name} SLA` : `${plan.label} SLA`;
   const where = regions.length ? ` in ${regions.join(', ')}` : '';
-  const sentence = `${name}${where} (${planTxt}): ${m.uptime_pct}% uptime for ${p.label} against a ${service.threshold_pct}% SLA target, so the SLA was ${compliant ? 'met' : 'missed'}. ${m.covered_minutes} minutes of vendor-marked outage on covered services were counted (${counted.length} incident${counted.length === 1 ? '' : 's'}); ${excluded.length} other incident${excluded.length === 1 ? '' : 's'} in the window did not count under the contract.${credit && credit.credit_pct > 0 ? ` Service credit owed: ${credit.credit_pct}% of the ${plan.period}'s fee.` : ''}`;
+  const sentence = inProgress
+    ? `${name}${where} (${planTxt}): ${p.label} is still running, so there is no final verdict yet. Up to ${iso(now).slice(0, 16).replace('T', ' ')} UTC: ${m.uptime_pct}% uptime, ${m.covered_minutes} minutes of vendor-marked outage counted on covered services (${counted.length} incident${counted.length === 1 ? '' : 's'}). The whole period allows ${fullAllowed} minutes against a ${service.threshold_pct}% target, so ${alreadyMissed ? 'the SLA is already missed for the period, whatever happens before it ends' : `the verdict is final when the period ends on ${iso(p.end).slice(0, 10)}`}.`
+    : `${name}${where} (${planTxt}): ${m.uptime_pct}% uptime for ${p.label} against a ${service.threshold_pct}% SLA target, so the SLA was ${compliant ? 'met' : 'missed'}. ${m.covered_minutes} minutes of vendor-marked outage on covered services were counted (${counted.length} incident${counted.length === 1 ? '' : 's'}); ${excluded.length} other incident${excluded.length === 1 ? '' : 's'} in the window did not count under the contract.${credit && credit.credit_pct > 0 ? ` Service credit owed: ${credit.credit_pct}% of the ${plan.period}'s fee.` : ''}`;
   return {
     service: `${name}${where}`, vendor: card.vendor, plan: plan.plan, covered_service: service.service, regions,
     period: p.label, period_start: iso(m.period_start), period_end: iso(m.period_end),
     uptime_pct: m.uptime_pct, sla_target_pct: service.threshold_pct, compliant,
-    downtime_minutes: m.covered_minutes, allowed_downtime_minutes: Math.round(((100 - service.threshold_pct) / 100) * minutes * 10) / 10, period_minutes: Math.round(minutes * 10) / 10,
+    downtime_minutes: m.covered_minutes, allowed_downtime_minutes: inProgress ? fullAllowed : Math.round(((100 - service.threshold_pct) / 100) * minutes * 10) / 10, period_minutes: Math.round((inProgress ? fullMinutes : minutes) * 10) / 10,
+    ...(inProgress ? { in_progress: true, measured_to: iso(now), minutes_elapsed: Math.round(minutes * 10) / 10, final_on: iso(p.end), already_missed: alreadyMissed } : {}),
     credit_pct: credit ? credit.credit_pct : null, claim_deadline: credit ? credit.claim_deadline : null, deadline_rule: credit ? credit.deadline_rule : null,
+    ...(credit && credit.last_day_to_claim ? { last_day_to_claim: credit.last_day_to_claim } : {}),
+    ...(credit && credit.claim_deadline_later ? { claim_deadline_later: credit.claim_deadline_later, last_day_to_claim_later: credit.last_day_to_claim_later, deadline_later_rule: credit.deadline_later_rule } : {}),
     answer: sentence,
     incidents_counted: counted.length,
     incidents: [...counted, ...excluded.slice(0, 25)].map((i) => ({ name: i.name, start: iso(i.start), end: iso(i.end), minutes: i.minutes, counted: i.in_scope, reason: i.reason, url: i.url || null })),
@@ -228,16 +240,22 @@ export function shortView(a) {
       how_to_assess: "Give the provider's public status page URL or its published SLA target to get a measured verdict.",
     };
   }
-  const verdict = `${a.compliant ? 'SLA MET' : 'SLA BREACHED'}: ${a.uptime_pct}% uptime against a ${a.sla_target_pct}% target`;
-  const reasons = a.compliant ? [] : [`uptime ${a.uptime_pct}% is below the ${a.sla_target_pct}% target (${a.downtime_minutes} min counted outage, ${a.allowed_downtime_minutes} min allowed)`];
+  const verdict = a.in_progress
+    ? (a.already_missed
+      ? `SLA BREACHED, PERIOD STILL RUNNING: ${a.downtime_minutes} min counted outage already exceeds the ${a.allowed_downtime_minutes} min the whole period allows`
+      : `PERIOD IN PROGRESS: ${a.uptime_pct}% uptime so far against a ${a.sla_target_pct}% target, final on ${String(a.final_on).slice(0, 10)}`)
+    : `${a.compliant ? 'SLA MET' : 'SLA BREACHED'}: ${a.uptime_pct}% uptime against a ${a.sla_target_pct}% target`;
+  const reasons = a.in_progress
+    ? [a.already_missed ? `counted outage already exceeds the whole period's allowance (${a.downtime_minutes} of ${a.allowed_downtime_minutes} min)` : `period still running: ${a.downtime_minutes} of ${a.allowed_downtime_minutes} allowed minutes used so far`]
+    : a.compliant ? [] : [`uptime ${a.uptime_pct}% is below the ${a.sla_target_pct}% target (${a.downtime_minutes} min counted outage, ${a.allowed_downtime_minutes} min allowed)`];
   const extra = {};
-  for (const k of ['downtime_minutes', 'allowed_downtime_minutes', 'incidents_counted', 'credit_pct', 'claim_deadline']) if (a[k] != null) extra[k] = a[k];
+  for (const k of ['downtime_minutes', 'allowed_downtime_minutes', 'incidents_counted', 'credit_pct', 'claim_deadline', 'last_day_to_claim', 'claim_deadline_later', 'last_day_to_claim_later', 'in_progress', 'measured_to', 'final_on']) if (a[k] != null) extra[k] = a[k];
   return {
     summary: `${a.service} over ${a.period}: ${verdict}.`,
-    sla: { breached: !a.compliant, target_pct: a.sla_target_pct, reasons, summary: verdict },
+    sla: { breached: a.in_progress ? (a.already_missed ? true : null) : !a.compliant, target_pct: a.sla_target_pct, reasons, summary: verdict },
     ...head, ...extra,
     answer: a.answer,
-    status: 'assessed', data_source: DATA_SOURCE, method: METHOD_TEXT,
+    status: a.in_progress ? 'in_progress' : 'assessed', data_source: DATA_SOURCE, method: METHOD_TEXT,
   };
 }
 

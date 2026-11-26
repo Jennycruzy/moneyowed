@@ -6,16 +6,19 @@ import crypto from 'node:crypto';
 import { listCards } from './cards.js';
 import { NOT_COVERED } from './vendors.js';
 import { draftClaim } from './claim.js';
-import { page, phead, esc, money, pct, dt, dayOnly, longDay, badge } from './views.js';
+import { page, phead, esc, money, pct, dt, dayOnly, longDay, closesAt, badge } from './views.js';
+import { lastDay } from './engine.js';
+// Checks saved before last_day existed still read right.
+const lastOf = (r) => r.last_day || lastDay(r.deadline, r.period_utc_offset_hours || 0);
 
 const median = (a) => { if (!a.length) return 0; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
 const unit = (period) => (String(period).includes('Q') ? 'quarter' : 'month');
 // "GitHub" + "GitHub Enterprise Cloud" -> "Enterprise Cloud"; keeps the plan readable next to the vendor name.
 const planOnly = (vendor, label) => String(label || '').replace(new RegExp(`^${vendor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`), '') || label;
-const windowCell = (deadline) => {
+const windowCell = (deadline, last) => {
   if (!deadline) return '<span class="pill">not stated</span>';
   const open = new Date(deadline) > new Date();
-  return `<span class="pill ${open ? 'pill-open' : ''}">${open ? 'open to' : 'closed'} ${longDay(deadline)}</span>`;
+  return `<span class="pill ${open ? 'pill-open' : ''}">${open ? 'last day' : 'closed, last day was'} ${longDay(last || lastDay(deadline))}</span>`;
 };
 
 export function makePages({ db, jobs, loadRecord, ROOT, DEFAULT_REGIONS, REGION_CHOICES }) {
@@ -50,7 +53,7 @@ export function makePages({ db, jobs, loadRecord, ROOT, DEFAULT_REGIONS, REGION_
   </aside>
 </div>
 ${open.length ? `<section class="block"><div class="block-head"><h2>Claims you can still make</h2><p>Breaches in the record whose claim window is still open.</p></div>
-<div class="cards4">${open.map((r) => `<a class="mini" href="/check?vendor=${esc(r.vendor)}&amp;period=${esc(r.period)}"><span class="k">${esc(r.vendor_name)} · ${esc(r.period)}</span><span class="mini-num mono">${r.credit_pct}%</span><span>of the ${unit(r.period)}'s bill · ${esc(r.service)}</span><span class="fine">claim by ${longDay(r.deadline)}</span></a>`).join('')}</div></section>` : ''}
+<div class="cards4">${open.map((r) => `<a class="mini" href="/check?vendor=${esc(r.vendor)}&amp;period=${esc(r.period)}"><span class="k">${esc(r.vendor_name)} · ${esc(r.period)}</span><span class="mini-num mono">${r.credit_pct}%</span><span>of the ${unit(r.period)}'s bill · ${esc(r.service)}</span><span class="fine">last day to claim ${longDay(r.last_day || lastDay(r.deadline))}</span></a>`).join('')}</div></section>` : ''}
 <section class="block"><div class="block-head"><h2>Covered vendors</h2><p>Each has a written credit SLA and a public incident history a program can read. <a href="/evidence#not-covered">Not covered, and why</a></p></div>
 <ul class="chips">${cards.map((c) => `<li>${esc(c.name)} <span>${esc(c.plans.map((p) => planOnly(c.name, p.label)).join(' · '))}</span></li>`).join('')}</ul></section>`, { active: 'check' });
   }
@@ -65,13 +68,15 @@ ${open.length ? `<section class="block"><div class="block-head"><h2>Claims you c
     const amount = r.credit_usd_total != null ? money(r.credit_usd_total) : `${owed.map((s) => `${s.credit_pct}%`).join(' + ')} of the bill`;
     const title = {
       OWED: `${esc(r.vendor_name)} owes you ${amount}`,
-      WINDOW_CLOSED: `${amount} was owed. The claim window closed ${longDay(r.deadline)}.`,
+      WINDOW_CLOSED: `${amount} was owed. The last day to claim was ${longDay(lastOf(r))}.`,
       NOT_OWED: `${esc(r.vendor_name)} kept its promise for ${esc(r.period)}`,
       PERIOD_OPEN: `${esc(r.period)} is still running`,
     }[r.code];
     const lede = {
-      OWED: `Claim by <b>${longDay(r.deadline)}</b>, ${r.days_left} days from now (${esc(r.deadline_rule)}). The vendor pays only if you ask.`,
-      WINDOW_CLOSED: `${esc(r.deadline_rule)}. Below is what a claim would have said, and the proof behind it.`,
+      OWED: r.deadline_later && new Date(r.deadline) < new Date()
+        ? `Claim now. The SLA counts the window from when you become eligible but does not say when that is. Counting from when outage crossed the limit, the last day was ${longDay(lastOf(r))}. Counting from the end of the ${unit(r.period)}, it is <b>${longDay(r.last_day_later)}</b>, ${r.days_left} days from now. The vendor pays only if you ask.`
+        : `Last day to claim: <b>${longDay(lastOf(r))}</b>, ${r.days_left} days from now (${esc(r.deadline_rule)}; the window closes ${closesAt(r.deadline)}).${r.deadline_later ? ` The SLA does not say when eligibility starts; counted from the end of the ${unit(r.period)} it runs to ${longDay(r.last_day_later)}, so the earlier date is the safe one.` : ''} The vendor pays only if you ask.`,
+      WINDOW_CLOSED: `${esc(r.deadline_rule)}: the window closed ${closesAt(r.deadline_later || r.deadline)}${r.deadline_later ? ', on either reading of when eligibility starts' : ''}. Below is what a claim would have said, and the proof behind it.`,
       NOT_OWED: 'Counted outage stayed inside what the contract allows.',
       PERIOD_OPEN: 'Figures so far. The verdict is final when the period ends.',
     }[r.code];
@@ -161,7 +166,7 @@ ${ctHtml}
 <div class="stats"><div><p class="big mono">${rec.rows.length}</p><p>vendor-periods checked</p></div><div><p class="big mono red">${rows.length}</p><p>owed a credit</p></div><div><p class="big mono">${openN}</p><p>still open to claim today</p></div><div><p class="big mono">${vendors.length}</p><p>vendors with a breach</p></div></div>
 <div class="filter" data-filter="#rec"><button type="button" class="chip on" data-v="">All</button>${vendors.map((v) => `<button type="button" class="chip" data-v="${esc(v)}">${esc(v)}</button>`).join('')}</div>
 <div class="tscroll"><table class="rec-t" id="rec"><thead><tr><th>Period</th><th>Vendor</th><th>Covered service</th><th class="num">Uptime</th><th class="num">Promise</th><th class="num">Credit</th><th>Claim window</th><th></th></tr></thead><tbody>
-${rows.map((r) => `<tr data-v="${esc(r.vendor_name)}"><td class="mono">${esc(r.period)}</td><td><b>${esc(r.vendor_name)}</b><br><span class="fine">${esc(planOnly(r.vendor_name, r.plan_label))}</span></td><td>${esc(r.service)}</td><td class="num mono">${pct(r.uptime_pct)}</td><td class="num mono">${pct(r.threshold_pct)}</td><td class="num mono red">${r.credit_pct}%</td><td>${windowCell(r.deadline)}</td><td><a class="go" href="/check?vendor=${esc(r.vendor)}&amp;period=${esc(r.period)}" aria-label="Check ${esc(r.vendor_name)} ${esc(r.period)}">Check →</a></td></tr>`).join('')}
+${rows.map((r) => `<tr data-v="${esc(r.vendor_name)}"><td class="mono">${esc(r.period)}</td><td><b>${esc(r.vendor_name)}</b><br><span class="fine">${esc(planOnly(r.vendor_name, r.plan_label))}</span></td><td>${esc(r.service)}</td><td class="num mono">${pct(r.uptime_pct)}</td><td class="num mono">${pct(r.threshold_pct)}</td><td class="num mono red">${r.credit_pct}%</td><td>${windowCell(r.deadline, r.last_day)}</td><td><a class="go" href="/check?vendor=${esc(r.vendor)}&amp;period=${esc(r.period)}" aria-label="Check ${esc(r.vendor_name)} ${esc(r.period)}">Check →</a></td></tr>`).join('')}
 </tbody></table></div>
 <p class="fine">Built ${dt(rec.built_at)} UTC. Clouds are counted for regions ${Object.entries(DEFAULT_REGIONS).map(([k, v]) => `${k} ${v.join(' + ')}`).join('; ')}. Download: <a href="/record.csv">CSV</a> · <a href="/record.json">JSON</a></p>`, { active: 'record', description: 'Every SLA breach by GitHub, Atlassian, Vercel, AWS and other vendors in the last 12 months, from their own incident history.' });
   }

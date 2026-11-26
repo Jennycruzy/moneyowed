@@ -120,3 +120,23 @@ test('the short view of an unmeasurable question states it was not assessed and 
     assert.match(s.summary, /SLA NOT ASSESSED/); assert.doesNotMatch(JSON.stringify(s), /Covered:/);
   }
 });
+
+test('a period still running gets no final verdict unless outage already exceeds the whole period', async () => {
+  const { shortView } = await import('../src/miner.js');
+  const comp = (n) => ({ id: n, name: n, group_id: null });
+  const down = (id, start, mins) => ({ id, name: 'Git down', impact: 'major', scheduled: false, start: new Date(start), end: new Date(+new Date(start) + mins * 60000),
+    components: [comp('Git Operations')], component_statuses_published: true,
+    component_windows: [{ component: 'Git Operations', component_id: 'Git Operations', status: 'major_outage', start: new Date(start), end: new Date(+new Date(start) + mins * 60000) }] });
+  const seedGh = (incidents) => writeIncidents('github', { source: 'statuspage', coverage_from: '2025-10-01T00:00:00.000Z', components: [comp('Git Operations')], incidents });
+  seedGh([down('x', '2026-11-03T00:00:00Z', 30)]);
+  let a = answerSla({ service: 'GitHub', period: '2026-11' }, { now: NOW });
+  assert.equal(a.in_progress, true); assert.equal(a.compliant, null); assert.equal(a.already_missed, false);
+  assert.equal(a.allowed_downtime_minutes, 43.2); // 0.1% of all 30 days of November, not of the days so far
+  let v = shortView(a);
+  assert.equal(v.status, 'in_progress'); assert.equal(v.sla.breached, null); assert.match(v.summary, /PERIOD IN PROGRESS/);
+  seedGh([down('y', '2026-11-03T00:00:00Z', 60)]);
+  a = answerSla({ service: 'GitHub', period: '2026-11' }, { now: NOW });
+  assert.equal(a.already_missed, true); assert.equal(a.compliant, false);
+  v = shortView(a);
+  assert.equal(v.sla.breached, true); assert.match(v.summary, /SLA BREACHED, PERIOD STILL RUNNING/);
+});
