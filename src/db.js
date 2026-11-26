@@ -9,6 +9,8 @@ export const questionHash = (q) => crypto.createHash('sha256').update(JSON.strin
 export function openDb(file = path.resolve(process.env.MONEYOWED_DATA || 'data', 'moneyowed.sqlite')) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const db = new DatabaseSync(file);
+  // The web app and the bot open the same file; wait for a lock instead of failing when both start at once.
+  db.exec('PRAGMA busy_timeout = 5000;');
   db.exec(`
     PRAGMA journal_mode = WAL;
     CREATE TABLE IF NOT EXISTS checks (id TEXT PRIMARY KEY, created_at TEXT, vendor TEXT, plan TEXT, period TEXT, regions TEXT, code TEXT, credit_usd REAL, result TEXT, source TEXT);
