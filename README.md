@@ -14,7 +14,7 @@
 No account, key or wallet needed.
 
 **1. See a real credit (30 s).** Open **[Jira Premium, June 2026, on a $1,000 bill](https://moneyowed.vercel.app/check/a4lYkfBx)**.
-You should see: *"$250.00 was owed. The claim window closed 16 Jul 2026."*, Jira at **98.97%** against its 99.9% promise, and all 7 incidents in June. Each one is marked counted or not, with the reason (3 counted, 445 minutes). Open **The contract terms used** to read Atlassian's own sentences behind the 99.9% and the 25% credit.
+You should see: *"$250.00 was owed. The last day to claim was 15 Jul 2026."*, Jira at **98.97%** against its 99.9% promise, and all 7 incidents in June. Each one is marked counted or not, with the reason (3 counted, 445 minutes). Open **The contract terms used** to read Atlassian's own sentences behind the 99.9% and the 25% credit.
 
 **2. See what Telegraph agents said about the same month (30 s).** Scroll to **Second opinions from Telegraph** on the same page. The check bought `SLA_COMPLIANCE_GENERAL` answers from miners on Telegraph at $0.01 each. Each row shows the miner, its answer, whether it agrees, the cost, the time and the answer hash. One miner said 100% and is marked **no**. Below that, **Contract terms from Telegraph** shows the claim clause sent as a `CONTRACT_OBLIGATION_AUDIT_GENERAL` question, and whether each answer gives the same 15-day window.
 
