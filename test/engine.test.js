@@ -131,6 +131,19 @@ test('period before held history is NO_HISTORY; open period is PERIOD_OPEN', () 
   assert.equal(checkCredit({ vendor: 'github', plan: 'enterprise-cloud', period: '2026-Q4', spend: {}, now: NOW }).code, 'PERIOD_OPEN');
 });
 
+test('cloud feed history begins at its earliest record: an earlier period is NO_HISTORY, not 100% uptime', async () => {
+  const { earliestStart } = await import('../src/sources/clouds.js');
+  const ev = (id, start) => ({ vendor: 'aws', source: 'aws', id, name: 'EC2 errors', impact: '3', start: new Date(start), end: new Date(+new Date(start) + 3600000), windows: [], service_key: 'ec2', service_name: 'Amazon EC2', locations: ['us-east-1'], event_region: 'us-east-1', disruption: false, max_status: 2 });
+  const incidents = [ev('a', '2026-03-10T00:00:00Z'), ev('b', '2026-01-28T09:00:00Z'), { ...ev('c', '2026-05-01T00:00:00Z'), start: null }];
+  assert.equal(earliestStart(incidents), '2026-01-28T09:00:00.000Z');
+  writeIncidents('aws', { source: 'aws', incidents });
+  assert.throws(() => checkCredit({ vendor: 'aws', period: '2023-09', regions: ['us-east-1'], now: NOW }), (e) => e.code === 'NO_HISTORY' && /starts 2026-01-28/.test(e.message));
+  assert.throws(() => checkCredit({ vendor: 'aws', period: '2026-01', regions: ['us-east-1'], now: NOW }), (e) => e.code === 'NO_HISTORY');
+  assert.equal(checkCredit({ vendor: 'aws', period: '2026-02', regions: ['us-east-1'], spend: {}, now: NOW }).services.length > 0, true);
+  writeIncidents('aws', { source: 'aws', incidents: [] });
+  assert.throws(() => checkCredit({ vendor: 'aws', period: '2026-02', regions: ['us-east-1'], now: NOW }), (e) => e.code === 'NO_HISTORY');
+});
+
 test('mailgun per-30-minute credit after the first 0.01%, capped at 50%', () => {
   // Oct: 44,640 min; free 4.464 min. 100 min down -> floor(95.5/30)=3 blocks -> 15%.
   seed('mailgun', [sp('g', 'api', new Date('2026-10-02T00:00:00Z'), new Date('2026-10-02T01:40:00Z'), 'major', [], { components: ['API'] })]);

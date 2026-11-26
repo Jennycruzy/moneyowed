@@ -170,6 +170,15 @@ function measureService(store, s, { groupsById, regions, mode, periodStart, peri
   return { rows, merged, ev };
 }
 
+// Where the history we hold begins. Statuspage stores carry the date we collected from. The AWS, Google Cloud and
+// Azure feeds only reach back so far, so their history begins at the earliest record in the copy we hold.
+// A period that starts earlier cannot be measured: an empty stretch there means no data, not no outage.
+export function heldFrom(store) {
+  if (store.coverage_from) return new Date(store.coverage_from);
+  const t = (store.incidents || []).filter((i) => i.start).map((i) => +new Date(i.start)).filter(Number.isFinite);
+  return t.length ? new Date(Math.min(...t)) : null;
+}
+
 // Uptime of one covered service over any window (used by the miner for "last N days" style questions).
 // No credit maths: credits are defined per billing period only.
 export function measureWindow({ vendor, plan: planId, service: serviceName, start, end, regions = [], mode = 'upper', now = new Date() }, { slaDir = path.resolve(process.env.MONEYOWED_DATA || 'data', 'sla') } = {}) {
@@ -179,7 +188,8 @@ export function measureWindow({ vendor, plan: planId, service: serviceName, star
   const plan = getPlan(card, planId || card.plans[0].plan);
   const s = plan.services.find((x) => x.service === serviceName) || plan.services[0];
   const store = readIncidents(vendor);
-  if (store.coverage_from && new Date(store.coverage_from) > start) throw new CheckError('NO_HISTORY', `${card.name} history we hold starts ${store.coverage_from.slice(0, 10)}.`);
+  const from = heldFrom(store);
+  if (!from || from > start) throw new CheckError('NO_HISTORY', from ? `${card.name} history we hold starts ${from.toISOString().slice(0, 10)}.` : `We hold no ${card.name} history yet.`);
   if (plan.per_region && !regions.length) throw new CheckError('BAD_INPUT', `${card.name} is measured per region; name one (e.g. us-east-1).`);
   const groupsById = new Map((store.components || []).filter((c) => c.group).map((c) => [c.id, c.name]));
   const periodEnd = end > now ? now : end;
@@ -204,7 +214,8 @@ export function checkCredit(input, { slaDir = path.resolve(process.env.MONEYOWED
   const periodMinutes = (periodEnd - periodStart) / 60000;
 
   const store = readIncidents(input.vendor);
-  if (store.coverage_from && new Date(store.coverage_from) > periodStart) throw new CheckError('NO_HISTORY', `${card.name} history we hold starts ${store.coverage_from.slice(0, 10)}; ${input.period} is earlier.`);
+  const from = heldFrom(store);
+  if (!from || from > periodStart) throw new CheckError('NO_HISTORY', from ? `${card.name} history we hold starts ${from.toISOString().slice(0, 10)}; ${input.period} is earlier.` : `We hold no ${card.name} history yet.`);
   const regions = input.regions || [];
   if (plan.per_region && !regions.length) throw new CheckError('BAD_INPUT', `${card.name} credits are per region; say which regions you use (e.g. us-east-1).`);
   const groupsById = new Map((store.components || []).filter((c) => c.group).map((c) => [c.id, c.name]));

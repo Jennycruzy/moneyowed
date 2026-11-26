@@ -4,7 +4,7 @@
 import { Archive } from '../src/archive.js';
 import { VENDORS } from '../src/vendors.js';
 import { normalizeStatuspageIncident } from '../src/sources/statuspage.js';
-import { normalizeAws, normalizeGcp, parseAzurePirs } from '../src/sources/clouds.js';
+import { normalizeAws, normalizeGcp, parseAzurePirs, earliestStart } from '../src/sources/clouds.js';
 import { writeIncidents, readIncidents } from '../src/store.js';
 import fs from 'node:fs';
 import zlib from 'node:zlib';
@@ -48,6 +48,6 @@ for (const v of VENDORS) {
       for (const x of parseAzurePirs(archive.read(r).toString('utf8'), r.sha256)) if (!seen.has(x.id)) { seen.add(x.id); incidents.push({ ...x, vendor: v.vendor }); }
     }
   }
-  writeIncidents(v.vendor, { source: v.source, coverage_from: prev?.coverage_from || (v.source === 'statuspage' ? new Date(Date.UTC(new Date().getUTCFullYear() - 1, new Date().getUTCMonth() - 1, 1)).toISOString() : null), components: components || prev?.components || null, incidents });
+  writeIncidents(v.vendor, { source: v.source, coverage_from: v.source === 'statuspage' ? (prev?.coverage_from || new Date(Date.UTC(new Date().getUTCFullYear() - 1, new Date().getUTCMonth() - 1, 1)).toISOString()) : earliestStart(incidents), components: components || prev?.components || null, incidents });
   console.log(`${v.vendor}: ${incidents.length} incidents rebuilt from ${recs.length} archived files${components ? `, ${components.length} components` : ''}`);
 }

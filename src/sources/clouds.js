@@ -4,12 +4,19 @@ import zlib from 'node:zlib';
 import { fetchRaw } from '../archive.js';
 import { toDate } from '../lib/time.js';
 
+// These feeds only reach back so far: the history they give begins at their earliest record.
+export function earliestStart(incidents) {
+  const t = incidents.filter((i) => i.start).map((i) => +toDate(i.start)).filter(Number.isFinite);
+  return t.length ? new Date(Math.min(...t)).toISOString() : null;
+}
+
 // ---------- Google Cloud
 export async function collectGcp({ vendor }, archive) {
   const url = 'https://status.cloud.google.com/incidents.json';
   const buf = await fetchRaw(url);
   const rec = archive.save(vendor, 'incidents.json', buf, { url });
-  return { vendor, incidents: JSON.parse(buf).map((x) => normalizeGcp(vendor, x, rec.sha256)) };
+  const incidents = JSON.parse(buf).map((x) => normalizeGcp(vendor, x, rec.sha256));
+  return { vendor, coverage_from: earliestStart(incidents), incidents };
 }
 
 export function normalizeGcp(vendor, x, sha256 = null) {
@@ -31,7 +38,8 @@ export async function collectAws({ vendor }, archive) {
   let raw = buf;
   if (buf[0] === 0x1f && buf[1] === 0x8b) raw = zlib.gunzipSync(buf);
   const text = raw.toString('utf8').replace(/^﻿/, '');
-  return { vendor, incidents: normalizeAws(vendor, JSON.parse(text), rec.sha256) };
+  const incidents = normalizeAws(vendor, JSON.parse(text), rec.sha256);
+  return { vendor, coverage_from: earliestStart(incidents), incidents };
 }
 
 // One record per (event, impacted service key), with that service's own window when AWS records it.
@@ -86,7 +94,7 @@ export async function collectAzure({ vendor }, archive, { maxPages = 10 } = {}) 
     pirs.push(...found);
     if (!found.length) break;
   }
-  return { vendor, incidents: pirs.map((x) => ({ ...x, vendor })) };
+  return { vendor, coverage_from: earliestStart(pirs), incidents: pirs.map((x) => ({ ...x, vendor })) };
 }
 
 function decode(s) {
