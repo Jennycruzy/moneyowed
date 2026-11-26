@@ -123,8 +123,8 @@ Scores are recomputed each epoch (a few hours). If a judgment intent has a publi
 
 ## Try ours
 
-- Ask the miner directly: [/contract-obligations](https://moneyowed.38-49-216-59.sslip.io/contract-obligations?contract=Supplier%20shall%20deliver%20500%20units%20by%2015%20March%202026.%20Supplier%20delivered%20the%20units%20on%2020%20March%202026.), [/sla-compliance](https://moneyowed.38-49-216-59.sslip.io/sla-compliance?service=GitHub&period=2026-Q3), [/server-uptime](https://moneyowed.38-49-216-59.sslip.io/server-uptime?url=https://github.com)
-- The app that buys these answers: [moneyowed.38-49-216-59.sslip.io](https://moneyowed.38-49-216-59.sslip.io)
+- Ask the miner directly: [/contract-obligations](https://moneyowed.vercel.app/contract-obligations?contract=Supplier%20shall%20deliver%20500%20units%20by%2015%20March%202026.%20Supplier%20delivered%20the%20units%20on%2020%20March%202026.), [/sla-compliance](https://moneyowed.vercel.app/sla-compliance?service=GitHub&period=2026-Q3), [/server-uptime](https://moneyowed.vercel.app/server-uptime?url=https://github.com)
+- The app that buys these answers: [moneyowed.vercel.app](https://moneyowed.vercel.app)
 - A monthly SLA credit check in your own repo: [the GitHub Action](../README.md#in-your-own-repo-every-month)
 
 Questions, or something that breaks: open an issue on [Jennycruzy/moneyowed](https://github.com/Jennycruzy/moneyowed/issues).

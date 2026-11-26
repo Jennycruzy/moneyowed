@@ -37,10 +37,25 @@ const jobs = new Map(); // check id -> 'buying' | 'done' | error text
 
 function json(res, code, body) { res.writeHead(code, { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' }); res.end(JSON.stringify(body, null, 1)); }
 function html(res, code, body) { res.writeHead(code, { 'content-type': 'text/html; charset=utf-8', 'content-security-policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" }); res.end(body); }
-async function readBody(req) {
+async function readRaw(req) {
   let b = '';
   for await (const c of req) { b += c; if (b.length > 100000) throw new Error('request too large'); }
+  return b;
+}
+
+async function readBody(req) {
+  const b = await readRaw(req);
   return req.headers['content-type']?.includes('application/json') ? JSON.parse(b || '{}') : Object.fromEntries(new URLSearchParams(b));
+}
+
+// Miner routes take a JSON object, a form, or (contract route) the plain text itself.
+async function minerBody(req, textKey) {
+  const b = await readRaw(req);
+  const type = req.headers['content-type'] || '';
+  if (!b.trim()) return {};
+  try { const j = JSON.parse(b); if (j && typeof j === 'object' && !Array.isArray(j)) return j; } catch {}
+  if (type.includes('application/x-www-form-urlencoded')) return Object.fromEntries(new URLSearchParams(b));
+  return textKey ? { [textKey]: b } : {};
 }
 
 function parseInput(src) {
@@ -153,7 +168,7 @@ const server = http.createServer(async (req, res) => {
     if ((p === '/miner/sla' || p === '/sla-compliance') && (req.method === 'GET' || req.method === 'POST')) {
       const t0 = Date.now();
       let q = Object.fromEntries(url.searchParams);
-      if (req.method === 'POST') { try { q = { ...q, ...JSON.parse((await readBody(req)) || '{}') }; } catch { q = { ...q }; } }
+      if (req.method === 'POST') q = { ...q, ...(await minerBody(req)) };
       const fromTelegraph = /telegraph|anjoman|go-http-client/i.test(req.headers['user-agent'] || '');
       const full = String(q.detail || '').toLowerCase() === 'full';
       const send = (body) => { res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' }); res.end(JSON.stringify(full ? body : shortView(body), null, full ? 1 : 2)); };
@@ -171,7 +186,7 @@ const server = http.createServer(async (req, res) => {
     if ((p === '/miner/uptime' || p === '/miner/api-health' || p === '/server-uptime' || p === '/api-health') && (req.method === 'GET' || req.method === 'POST')) {
       const t0 = Date.now();
       let q = Object.fromEntries(url.searchParams);
-      if (req.method === 'POST') { try { q = { ...q, ...JSON.parse((await readBody(req)) || '{}') }; } catch { q = { ...q }; } }
+      if (req.method === 'POST') q = { ...q, ...(await minerBody(req)) };
       const fromTelegraph = /telegraph|anjoman|go-http-client/i.test(req.headers['user-agent'] || '');
       const kind = /uptime/.test(p) ? 'uptime' : 'api-health';
       try {
@@ -189,7 +204,7 @@ const server = http.createServer(async (req, res) => {
     if ((p === '/miner/contract' || p === '/contract-obligations') && (req.method === 'GET' || req.method === 'POST')) {
       const t0 = Date.now();
       let q = Object.fromEntries(url.searchParams);
-      if (req.method === 'POST') { const b = await readBody(req); try { q = { ...q, ...JSON.parse(b || '{}') }; } catch { q = { ...q, contract: b }; } }
+      if (req.method === 'POST') q = { ...q, ...(await minerBody(req, 'contract')) };
       const fromTelegraph = /telegraph|anjoman|go-http-client/i.test(req.headers['user-agent'] || '');
       try {
         const a = await answerObligations(q);
