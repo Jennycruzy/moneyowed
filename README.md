@@ -71,8 +71,9 @@ A team that pays for developer and cloud tools. Each month, MONEY OWED tells the
 | **GitHub Action** | One workflow file. Each month it opens an issue for every credit owed. [Set-up below](#in-your-own-repo-every-month). |
 | **Telegram** | `/check github 2026-Q3 6000`, `/owed` (claim windows open now), `/watch jira` (a message when a watched vendor misses in a way that owes a credit). |
 | **Browser extension** | Open a vendor invoice in Gmail and click the icon: *"This invoice is $2,000. You are owed $200 (10%) for 2026-10. Claim before paying."* [Download](https://moneyowed.vercel.app/extension.zip) (unzip, then "Load unpacked" in `chrome://extensions`), try it on the [sample invoice](https://moneyowed.vercel.app/sample-invoice). |
+| **OpenClaw and Hermes** | `agents/install.sh openclaw` or `agents/install.sh hermes` adds the skill and a weekly job. Your agent messages you only when money is owed, a promise is already missed this period, or your SLA terms change. [Set-up below](#inside-your-agent-openclaw-and-hermes). |
 | **AI agents (MCP)** | `node bin/moneyowed-mcp.js` gives Claude, Cursor or any MCP client the tools `check_credit`, `list_incidents`, `get_rule_card`, `draft_claim`, `sla_compliance`, `list_vendors`. |
-| **Command line** | `node bin/moneyowed.js check jira 2026-06 --spend 1000`, `verify <proof.json>`, `vendors`. |
+| **Command line** | `node bin/moneyowed.js check jira 2026-06 --spend 1000`, `verify <proof.json>`, `vendors`, `claim <check id>`, `watch add / run / list`. |
 | **HTTP API** | `POST /api/check`, `GET /check/<id>.json`, `GET /check/<id>/proof.json`, `GET /api/cards/<vendor>`, `GET /api/vendors`. |
 
 ## In your own repo, every month
@@ -99,6 +100,33 @@ jobs:
 ```
 
 One vendor per line as `vendor[:plan][=monthly bill in USD]`. `node bin/moneyowed.js vendors` lists the ids and plans. The run summary shows every vendor, and each check also buys Telegraph SLA answers and links them on its page. This repo runs the same file: [workflow](https://github.com/Jennycruzy/moneyowed/actions/workflows/sla-credits.yml), [the issue it opened](https://github.com/Jennycruzy/moneyowed/issues/1).
+
+## Inside your agent (OpenClaw and Hermes)
+
+```bash
+git clone https://github.com/Jennycruzy/moneyowed && cd moneyowed
+agents/install.sh openclaw          # or: agents/install.sh hermes, agents/install.sh cron
+moneyowed watch add vercel --spend 2000
+moneyowed watch add github --spend 6000
+moneyowed watch run                 # once now; after that, every Monday 09:00
+```
+
+The installer puts the CLI on your path, copies the skill (`agents/moneyowed/SKILL.md`) and schedules a weekly job that runs the check itself, with no model call. On OpenClaw it is a command automation; on Hermes it is a no-agent cron script. Nothing new means no message. A first run looks like this:
+
+```
+Vercel owes you $200 for 2026-10 (Vercel Enterprise).
+  Vercel Services (content serving): 99.9645% uptime against 99.99% promised, 15.8 min of counted outage.
+  Last day to claim: 5 Nov 2026 counting from the outage, 30 Nov 2026 counting from the end of the period (4 days left).
+  Claim email: moneyowed claim C1rYPuUc   Proof: https://moneyowed.38-49-216-59.sslip.io/check/C1rYPuUc/proof.json
+  Telegraph: 4 answers bought for $0.04; 3 of 3 SLA answers agree it was missed; 1 of 1 contract answers give the same claim window and address (one seller is MONEY OWED's own miner).
+
+GitHub Enterprise Cloud: the promise for 2026-Q4 is already missed, and the period is still running.
+  GitHub Enterprise Cloud: 254.3 min of counted outage so far, 132.5 allowed for the whole period; $300 owed at today's count.
+```
+
+- **Messages only when something is new:** a credit owed, one reminder when the claim window has 5 days or fewer left, a promise already missed in the period still running, or changed SLA terms (a threshold, credit tier or claim rule). A reworded SLA page with the same terms stays quiet. A check that fails is always reported and retried next run.
+- **Budget:** put a Telegraph testnet key in `~/.moneyowed/.env` (`TELEGRAPH_PRIVATE_KEY=0x...`) and each newly owed credit buys SLA and contract answers from other sellers on Telegraph. Spending stops at `moneyowed watch budget --run 0.05 --month 0.20` (the defaults). Without a key it buys nothing.
+- **Claim:** `moneyowed claim <check id> --customer "Acme Ltd" --account team-acme` prints the email. You send it.
 
 ## How Telegraph is used
 
