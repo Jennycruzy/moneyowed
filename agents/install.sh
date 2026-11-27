@@ -29,7 +29,9 @@ case "$target" in
     mkdir -p "$oc/skills/moneyowed"
     cp "$here/moneyowed/SKILL.md" "$oc/skills/moneyowed/SKILL.md"
     echo "skill: $oc/skills/moneyowed/SKILL.md"
-    if openclaw cron add --name moneyowed-weekly --cron "$schedule" --command "$bin watch run" \
+    to=()   # MONEYOWED_DELIVER=telegram:<chat id> (or discord:<channel id>, ...) sends to that chat; default is the last chat used
+    if [ -n "${MONEYOWED_DELIVER:-}" ]; then to=(--channel "${MONEYOWED_DELIVER%%:*}" --to "${MONEYOWED_DELIVER#*:}"); fi
+    if openclaw cron add --name moneyowed-weekly --cron "$schedule" --command "$bin watch run" "${to[@]}" \
          --description "MONEY OWED: SLA credits owed, promises missed, terms changed" --announce --declaration-key moneyowed-weekly; then
       echo "scheduled: $schedule (OpenClaw automation moneyowed-weekly)"
     else
