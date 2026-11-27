@@ -260,3 +260,17 @@ export async function answerApiHealth(q, { now = new Date() } = {}) {
     method: 'GET with Accept: application/json, redirects followed; healthy = HTTP 2xx/3xx under 2 s with a parseable body and no open vendor incident',
   };
 }
+
+// The default API health answer: the full answer without fields that repeat another one
+// (check.summary, json.keys, an equal ttfb_ms, a final_url equal to url, zero redirects).
+// Shorter answers fit the scorer's 512-token window whole. The full answer stays behind ?detail=full.
+export function apiHealthView(a) {
+  if (a.status === 'not_checked') return a;
+  const v = { ...a, check: { ...a.check } };
+  delete v.check.summary;
+  if (v.json) { v.json = { ...v.json }; delete v.json.keys; }
+  if (v.ttfb_ms === v.latency_ms) delete v.ttfb_ms;
+  if (v.final_url === v.url) delete v.final_url;
+  if (v.redirects === 0) delete v.redirects;
+  return v;
+}

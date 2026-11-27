@@ -17,7 +17,7 @@ import { landingData, renderLanding } from './landing.js';
 import { makePages } from './pages.js';
 import { answerSla, abstainSla, shortView, ERROR_STATUS } from './miner.js';
 import { buildProof } from './proof.js';
-import { answerUptime, answerApiHealth, uptimeView } from './probe.js';
+import { answerUptime, answerApiHealth, uptimeView, apiHealthView } from './probe.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DATA = path.resolve(process.env.MONEYOWED_DATA || path.join(ROOT, 'data'));
@@ -194,7 +194,7 @@ const server = http.createServer(async (req, res) => {
         db.minerCall({ service: a.url || q.url || q.question, period: kind, status: 200, code: a.status === 'not_checked' ? 'NOT_CHECKED' : null, from_telegraph: fromTelegraph, ms: Date.now() - t0 });
         const full = String(q.detail || '').toLowerCase() === 'full';
         res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'access-control-allow-origin': '*' });
-        return res.end(JSON.stringify(kind === 'uptime' && !full ? uptimeView(a) : a, null, 2));
+        return res.end(JSON.stringify(full ? a : kind === 'uptime' ? uptimeView(a) : apiHealthView(a), null, 2));
       } catch (e) {
         console.error('miner', kind, e);
         db.minerCall({ service: q.url || q.question, period: kind, status: 500, code: 'ERROR', from_telegraph: fromTelegraph, ms: Date.now() - t0 });

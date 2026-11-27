@@ -76,3 +76,16 @@ test('uptime view: verdict first, sla block agrees with every field, history bel
   const nc = uptimeView({ status: 'not_checked', url: null, service: 'is my server up?', summary: 'is my server up?: UPTIME NOT CHECKED.', check: { reasons: ['no address was given to check'] } });
   assert.equal(nc.is_up, null); assert.equal(nc.uptime_pct, null); assert.equal(nc.compliant, null); assert.equal(nc.sla.breached, null);
 });
+
+test('api health default view drops only repeated fields', async () => {
+  const { apiHealthView } = await import('../src/probe.js');
+  const full = { summary: 's', check: { result: 'healthy', reasons: [], summary: 'HEALTHY' }, url: 'https://a.example', healthy: true, latency_ms: 10, ttfb_ms: 10,
+    json: { valid: true, type: 'object', keys: ['a'] }, final_url: 'https://a.example', redirects: 0, status: 'checked' };
+  const v = apiHealthView(full);
+  assert.deepEqual(Object.keys(v), ['summary', 'check', 'url', 'healthy', 'latency_ms', 'json', 'status']);
+  assert.deepEqual(v.check, { result: 'healthy', reasons: [] });
+  assert.deepEqual(v.json, { valid: true, type: 'object' });
+  assert.equal(full.check.summary, 'HEALTHY');   // the full answer is not changed
+  const moved = apiHealthView({ ...full, ttfb_ms: 4, final_url: 'https://b.example', redirects: 1 });
+  assert.equal(moved.ttfb_ms, 4); assert.equal(moved.final_url, 'https://b.example'); assert.equal(moved.redirects, 1);
+});

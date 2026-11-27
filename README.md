@@ -138,7 +138,7 @@ MONEY OWED is both a buyer and a seller on Telegraph.
 
 Spending is capped per user and per day. A fresh answer to the same question is reused for an hour instead of being bought twice.
 
-**As a seller (miner 2611217).** The same engine answers four intents for any Telegraph buyer: `SLA_COMPLIANCE_GENERAL`, `SERVER_UPTIME_MONITOR_GENERAL`, `API_HEALTH_CHECK_GENERAL` and `CONTRACT_OBLIGATION_AUDIT_GENERAL`. Its registration, the daily public accuracy check (17 of 17 hand-counted vendor-months) and our evaluation material (443 pairs in three pools) are in **[moneyowed-sla](https://github.com/Jennycruzy/moneyowed-sla)**.
+**As a seller (miner 2611217).** The same engine answers four intents for any Telegraph buyer: `SLA_COMPLIANCE_GENERAL`, `SERVER_UPTIME_MONITOR_GENERAL`, `API_HEALTH_CHECK_GENERAL` and `CONTRACT_OBLIGATION_AUDIT_GENERAL`. The app buys from it through the same escrow as from everyone else, so the seller is used by a real product: by 27 Nov 2026, 16 of the app's 52 paid answers (8 SLA, 8 contract) came from miner 2611217, each one labelled as ours on the result page and listed in [/purchases.json](https://moneyowed.vercel.app/purchases.json). Its registration, the daily public accuracy check (17 of 17 hand-counted vendor-months) and our evaluation material (443 pairs in three pools) are in **[moneyowed-sla](https://github.com/Jennycruzy/moneyowed-sla)**.
 
 **New to Telegraph?** [Sell an answer on Telegraph](docs/sell-an-answer-on-telegraph.md) walks through how we built, registered and priced this miner, with the mistakes that cost us points.
 
@@ -160,6 +160,11 @@ GitHub Enterprise Cloud, Jira, Confluence, Jira Service Management, Bitbucket, V
 - 21 Nov 2026: the GitHub and Jira numbers ([X](https://x.com/jennyoliver57/status/2124184069105705459))
 - 23 Nov 2026: the app, the miner and the evaluation pairs, with three findings for other SLA builders ([Telegraph Discord](https://discord.com/channels/1438396125609463881/1574417365095948360/1574417365095948360))
 - 25 Nov 2026: Sanity's October miss and its closing claim window, plus live uptime and API health answers ([X](https://x.com/jennyoliver57/status/2125708225823556027), [Telegraph Discord](https://discord.com/channels/1438396125609463881/1574417365095948360/1575267771506360472))
+
+**Checked by other builders.** Two Telegraph builders tested MONEY OWED from a fresh clone and the live miner:
+- [Issue #2](https://github.com/Jennycruzy/moneyowed/issues/2): `npm test` failed on a fresh clone because the test data was not in the repo. Fixed in [38e0749](https://github.com/Jennycruzy/moneyowed/commit/38e0749); a fresh clone now passes every test.
+- [Issue #3](https://github.com/Jennycruzy/moneyowed/issues/3): three claim-window dates read a day late or gave only one reading of the SLA. The tester found the uptime maths correct in every case tried. Fixed in [38e0749](https://github.com/Jennycruzy/moneyowed/commit/38e0749).
+- A second team reproduced GitHub 2026-Q3 (99.3761%, breached) and the **Non-compliant** contract result exactly as described above, and asked to route its vendor due-diligence and work-verification requests to this miner's `SLA_COMPLIANCE_GENERAL` and `CONTRACT_OBLIGATION_AUDIT_GENERAL` intents.
 
 ## Run it yourself
 
